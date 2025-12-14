@@ -1,5 +1,5 @@
 module "app_db" {
-  source = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/RDS?ref=main"
+  source = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git/modules/RDS?ref=main"
 
   project_name        = "fiap-tech-challenge-catalog"
   project_common_tags = { Project = "catalog" }
