@@ -1,0 +1,482 @@
+basePath: /v1
+definitions:
+  schemas.CategoryNotFoundErrorSchema:
+    properties:
+      error:
+        example: Category not found
+        type: string
+    type: object
+  schemas.CategoryResponseSchema:
+    properties:
+      active:
+        example: true
+        type: boolean
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Bebidas
+        type: string
+    type: object
+  schemas.CreateCategorySchema:
+    properties:
+      active:
+        type: boolean
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  schemas.CreateProductSchema:
+    properties:
+      active:
+        type: boolean
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - category_id
+    - description
+    - name
+    type: object
+  schemas.ImageResponseSchema:
+    properties:
+      file_name:
+        example: image.jpg
+        type: string
+      url:
+        example: https://example.com/image.jpg
+        type: string
+    type: object
+  schemas.InvalidCategoryDataErrorSchema:
+    properties:
+      error:
+        example: Invalid category data
+        type: string
+    type: object
+  schemas.InvalidProductDataErrorSchema:
+    properties:
+      error:
+        example: Invalid product data
+        type: string
+    type: object
+  schemas.ProductNotFoundErrorSchema:
+    properties:
+      error:
+        example: Product not found
+        type: string
+    type: object
+  schemas.ProductResponseSchema:
+    properties:
+      active:
+        example: true
+        type: boolean
+      category_id:
+        example: 2cb7f56d-89a1-4e60-b488-65dc4ffacbc6
+        type: string
+      description:
+        example: Lanche com carne, queijo, alface e tomate
+        type: string
+      id:
+        example: 76fbddb3-3e2f-4f5f-a4e1-30a0a2384eae
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/schemas.ImageResponseSchema'
+        type: array
+      name:
+        example: X-Salada
+        type: string
+      price:
+        example: 20.5
+        type: number
+    type: object
+  schemas.UpdateCategoryRequestBodySchema:
+    properties:
+      active:
+        type: boolean
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  schemas.UpdateProductRequestBodySchema:
+    properties:
+      active:
+        type: boolean
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - category_id
+    - description
+    - name
+    type: object
+  tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema:
+    properties:
+      error:
+        example: Internal server error
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is an API for a tech challenge.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Tech Challenge API - Categorias e Produtos
+  version: "1.0"
+paths:
+  /categories/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schemas.CategoryResponseSchema'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: List all categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category to create
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateCategorySchema'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schemas.CategoryResponseSchema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidCategoryDataErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: CreateCategory a new category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      parameters:
+      - description: Category Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidCategoryDataErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: DeleteCategory a Category by ID
+      tags:
+      - Categories
+    get:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CategoryResponseSchema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidCategoryDataErrorSchema'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schemas.CategoryNotFoundErrorSchema'
+      summary: Get a Category by ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UpdateCategoryRequestBodySchema'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CategoryResponseSchema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidCategoryDataErrorSchema'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schemas.CategoryNotFoundErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: UpdateCategory a Category by ID
+      tags:
+      - Categories
+  /products/:
+    get:
+      parameters:
+      - description: Filter by category ID
+        in: query
+        name: category_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schemas.ProductResponseSchema'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: List all products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product to create
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateProductSchema'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schemas.ProductResponseSchema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidProductDataErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: Create a new product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidProductDataErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: Delete a product by ID
+      tags:
+      - Products
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ProductResponseSchema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidProductDataErrorSchema'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schemas.ProductNotFoundErrorSchema'
+      summary: Get a product by ID
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UpdateProductRequestBodySchema'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ProductResponseSchema'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidProductDataErrorSchema'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schemas.ProductNotFoundErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: Update a product by ID
+      tags:
+      - Products
+  /products/{id}/images:
+    patch:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidProductDataErrorSchema'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schemas.ProductNotFoundErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: Add image to a product
+      tags:
+      - Products
+  /products/{id}/images/{image_file_name}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nome do arquivo da imagem
+        in: path
+        name: image_file_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schemas.InvalidProductDataErrorSchema'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schemas.ProductNotFoundErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tech_challenge_internal_product_infra_api_schemas.ErrorMessageSchema'
+      summary: Delete an image from a product
+      tags:
+      - Products
+schemes:
+- http
+swagger: "2.0"
