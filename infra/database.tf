@@ -11,7 +11,7 @@ module "app_db" {
   db_instance_class    = "db.t3.micro"
   db_username          = "appuser"
 
-  private_subnets = data.terraform_remote_state.infra.outputs.private_subnets
+  private_subnets = data.terraform_remote_state.infra.outputs.private_subnet_ids
   vpc_id          = data.terraform_remote_state.infra.outputs.vpc_id
 }
 
