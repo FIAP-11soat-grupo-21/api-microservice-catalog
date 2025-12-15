@@ -57,3 +57,12 @@ module "api_gateway_routes" {
   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
   api_gw_logs_arn     = data.terraform_remote_state.infra.outputs.api_gateway_logs_arn
 }
+
+module "dynamodb_table" {
+  source = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/Dynamo?ref=main"
+
+  name          = "${var.application_name}-table"
+  hash_key      = "pk"
+  hash_key_type = "S"
+  billing_mode  = "PAY_PER_REQUEST"
+}
