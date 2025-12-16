@@ -36,3 +36,8 @@ variable "health_check_path" {
   type        = string
   default     = "/health"
 }
+variable "task_role_policy_arns" {
+  description = "Lista de ARNs de políticas para anexar à função da tarefa ECS"
+  type        = list(string)
+  default     = []
+}
