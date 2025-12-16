@@ -1,10 +1,11 @@
-application_name = "restaurant-api"
+application_name = "catalog-api"
 image_name       = "GHCR_IMAGE_TAG"
 image_port       = 8080
 container_environment_variables = {
   GO_ENV : "production"
   API_PORT : "8080"
   API_HOST : "0.0.0.0"
+  AWS_REGION : "us-east-2"
   API_UPLOAD_URL : "http://localhost:8080/uploads"
   DB_RUN_MIGRATIONS : "true"
   DB_NAME : "postgres"
@@ -23,4 +24,8 @@ container_environment_variables = {
   GOOGLE_PROJECT_ID : "fiap-tech-challenge",
 }
 container_secrets = {}
-health_check_path = "/swagger/index.html"
+health_check_path = "/health"
+task_role_policy_arns = [
+  "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+  "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+]
