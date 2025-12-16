@@ -26,7 +26,7 @@ module "catalog_api" {
   registry_credentials_arn = data.terraform_remote_state.infra.outputs.ecr_registry_credentials_arn
 
   ecs_container_environment_variables = var.container_environment_variables
-  ecs_container_secrets = var.container_secrets
+  ecs_container_secrets               = var.container_secrets
 
   private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_ids
   task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
