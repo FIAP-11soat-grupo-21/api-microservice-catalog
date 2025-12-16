@@ -4,7 +4,7 @@ module "ALB" {
   health_check_path  = var.health_check_path
   app_port           = var.image_port
   is_internal        = true
-  private_subnet_ids = data.terraform_remote_state.infra.outputs.private_subnet_id
+  private_subnet_ids = data.terraform_remote_state.infra.outputs.private_subnet_ids
   vpc_id             = data.terraform_remote_state.infra.outputs.vpc_id
   vpc_cidr_blocks    = [data.terraform_remote_state.infra.outputs.vpc_cdir_block]
 
@@ -26,8 +26,9 @@ module "catalog_api" {
   registry_credentials_arn = data.terraform_remote_state.infra.outputs.ecr_registry_credentials_arn
 
   ecs_container_environment_variables = var.container_environment_variables
+  ecs_container_secrets               = var.container_secrets
 
-  private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_id
+  private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_ids
   task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
   task_role_policy_arns   = var.task_role_policy_arns
   alb_target_group_arn    = module.ALB.target_group_arn
@@ -42,11 +43,12 @@ module "api_gateway_routes" {
 
   api_id            = data.terraform_remote_state.infra.outputs.api_gateway_id
   vpc_link_id       = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
-  alb_listener_arn  = module.ALB.listener_arn
-  gwapi_route_key   = "GET /{proxy+}"
+  alb_listener_arn  = data.terraform_remote_state.infra.outputs.alb_listener_arn
+  gwapi_route_key   = "ANY /{proxy+}"
   gwapi_auto_deploy = true
   stage_name        = data.terraform_remote_state.infra.outputs.api_gateway_stage_name
 
   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
   api_gw_logs_arn     = data.terraform_remote_state.infra.outputs.api_gateway_logs_arn
 }
+
