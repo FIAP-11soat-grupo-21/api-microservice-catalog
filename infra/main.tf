@@ -44,11 +44,6 @@ module "api_gateway_routes" {
   api_id            = data.terraform_remote_state.infra.outputs.api_gateway_id
   vpc_link_id       = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
   alb_listener_arn  = module.ALB.listener_arn
-  gwapi_route_key   = "ANY /{proxy+}"
-  gwapi_auto_deploy = true
-  stage_name        = data.terraform_remote_state.infra.outputs.api_gateway_stage_name
-
-  project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
-  api_gw_logs_arn     = data.terraform_remote_state.infra.outputs.api_gateway_logs_arn
+  gwapi_route_key   = "ANY /products/{proxy+}"
 }
 
