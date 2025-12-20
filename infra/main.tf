@@ -58,4 +58,3 @@ resource "aws_apigatewayv2_integration" "alb_proxy" {
   connection_type = "VPC_LINK"
   connection_id   = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
 }
-

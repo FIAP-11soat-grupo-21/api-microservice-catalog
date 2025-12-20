@@ -29,10 +29,8 @@ type Config struct {
 		ApiBaseURL    string
 	}
 	AWS struct {
-		Region          string
-		AccessKeyID     string
-		SecretAccessKey string
-		S3              struct {
+		Region string
+		S3     struct {
 			BucketName        string
 			Endpoint          string
 			PresignExpiration string
@@ -95,8 +93,6 @@ func (c *Config) Load() {
 	c.PaymentGateway.ApiBaseURL = getEnv("MERCADOPAGO_API_URL")
 
 	c.AWS.Region = getEnv("AWS_REGION")
-	c.AWS.AccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
-	c.AWS.SecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
 
 	c.AWS.S3.BucketName = getEnv("AWS_S3_BUCKET_NAME")
 	c.AWS.S3.Endpoint = getEnv("AWS_S3_ENDPOINT")
