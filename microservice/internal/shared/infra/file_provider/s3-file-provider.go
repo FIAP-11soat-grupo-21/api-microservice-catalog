@@ -8,7 +8,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"tech_challenge/internal/shared/config/env"
@@ -42,11 +41,6 @@ func NewS3FileProvider(bucketName string) *S3FileProvider {
 		context.TODO(),
 		config.WithRegion(cfgEnv.AWS.Region),
 		config.WithEndpointResolver(customResolver),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			cfgEnv.AWS.AccessKeyID,
-			cfgEnv.AWS.SecretAccessKey,
-			"",
-		)),
 	)
 
 	if err != nil {
