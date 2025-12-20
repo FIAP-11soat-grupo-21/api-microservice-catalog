@@ -31,7 +31,12 @@ module "catalog_api" {
       DB_HOST = module.app_db.db_connection
     }
   )
-  ecs_container_secrets = var.container_secrets
+
+  ecs_container_secrets               = merge(var.container_secrets,
+    {
+      DB_PASSWORD : module.app_db.db_secret_password_arn
+    }
+  )
 
   private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_ids
   task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
@@ -42,13 +47,44 @@ module "catalog_api" {
   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
 }
 
+resource "aws_apigatewayv2_integration" "alb_proxy" {
+  api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
+  integration_type = "HTTP_PROXY"
+
+  integration_uri        = module.ALB.listener_arn
+  integration_method     = "ANY"
+  payload_format_version = "1.0"
+
+  connection_type = "VPC_LINK"
+  connection_id   = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
+}
+
+resource "aws_apigatewayv2_integration" "alb_proxy" {
+  api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
+  integration_type = "HTTP_PROXY"
+
+  integration_uri        = module.ALB.listener_arn
+  integration_method     = "ANY"
+  payload_format_version = "1.0"
+
+  connection_type = "VPC_LINK"
+  connection_id   = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
+}
+
 module "api_gateway_routes" {
   source     = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/API-Gateway-Routes?ref=main"
   depends_on = [module.catalog_api]
 
   api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
-  vpc_link_id      = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
-  alb_listener_arn = module.ALB.listener_arn
   gwapi_route_key  = "ANY /products/{proxy+}"
+  alb_proxy_id     = aws_apigatewayv2_integration.alb_proxy.id
 }
 
+module "api_gateway_routes" {
+  source     = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/API-Gateway-Routes?ref=main"
+  depends_on = [module.catalog_api]
+
+  api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
+  gwapi_route_key  = "ANY /categories/{proxy+}"
+  alb_proxy_id     = aws_apigatewayv2_integration.alb_proxy.id
+}
