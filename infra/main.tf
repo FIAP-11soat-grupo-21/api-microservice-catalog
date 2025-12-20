@@ -32,7 +32,7 @@ module "catalog_api" {
     }
   )
 
-  ecs_container_secrets               = merge(var.container_secrets,
+  ecs_container_secrets = merge(var.container_secrets,
     {
       DB_PASSWORD : module.app_db.db_secret_password_arn
     }
@@ -75,16 +75,16 @@ module "api_gateway_routes" {
   source     = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/API-Gateway-Routes?ref=main"
   depends_on = [module.catalog_api]
 
-  api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
-  gwapi_route_key  = "ANY /products/{proxy+}"
-  alb_proxy_id     = aws_apigatewayv2_integration.alb_proxy.id
+  api_id          = data.terraform_remote_state.infra.outputs.api_gateway_id
+  gwapi_route_key = "ANY /products/{proxy+}"
+  alb_proxy_id    = aws_apigatewayv2_integration.alb_proxy.id
 }
 
 module "api_gateway_routes" {
   source     = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/API-Gateway-Routes?ref=main"
   depends_on = [module.catalog_api]
 
-  api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
-  gwapi_route_key  = "ANY /categories/{proxy+}"
-  alb_proxy_id     = aws_apigatewayv2_integration.alb_proxy.id
+  api_id          = data.terraform_remote_state.infra.outputs.api_gateway_id
+  gwapi_route_key = "ANY /categories/{proxy+}"
+  alb_proxy_id    = aws_apigatewayv2_integration.alb_proxy.id
 }
