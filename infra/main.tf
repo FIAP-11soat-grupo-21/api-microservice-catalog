@@ -28,7 +28,7 @@ module "catalog_api" {
   ecs_container_environment_variables = merge(
     var.container_environment_variables,
     {
-      DB_HOST = data.terraform_remote_state.infra.outputs.db_address
+      DB_HOST = module.app_db.db_connection
     }
   )
   ecs_container_secrets = var.container_secrets
