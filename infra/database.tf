@@ -1,8 +1,7 @@
 module "app_db" {
-  source              = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/RDS?ref=main"
-  project_name        = "fiap-tech-challenge-catalog"
-  project_common_tags = { Project = "catalog" }
-
+  source               = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/RDS?ref=main"
+  project_common_tags  = { Project = "catalog" }
+  app_name             = "catalog-api-db"
   db_port              = 5432
   db_allocated_storage = 20
   db_storage_type      = "gp2"
