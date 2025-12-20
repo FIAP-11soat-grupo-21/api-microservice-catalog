@@ -27,5 +27,6 @@ container_secrets = {}
 health_check_path = "/health"
 task_role_policy_arns = [
   "arn:aws:iam::aws:policy/AmazonS3FullAccess",
-  "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+  "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
+  "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 ]
