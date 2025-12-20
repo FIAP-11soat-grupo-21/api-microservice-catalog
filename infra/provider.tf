@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "fiap-tc-terraform-846874-v2"
+    bucket = "fiap-tc-terraform-846874"
     key    = "tech-challenge-project/catalog/terraform.tfstate"
     region = "us-east-2"
   }
