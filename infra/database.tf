@@ -8,7 +8,7 @@ module "app_db" {
   db_engine            = "postgres"
   db_engine_version    = "13"
   db_instance_class    = "db.t3.micro"
-  db_username          = "appuser"
+  db_username          = "adminuser"
 
   private_subnets = data.terraform_remote_state.infra.outputs.private_subnet_ids
   vpc_id          = data.terraform_remote_state.infra.outputs.vpc_id
