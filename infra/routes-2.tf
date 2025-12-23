@@ -36,18 +36,6 @@ module "catalog_api" {
   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
 }
 
-resource "aws_apigatewayv2_integration" "alb_proxy" {
-  api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
-  integration_type = "HTTP_PROXY"
-
-  integration_uri        = module.ALB.listener_arn
-  integration_method     = "ANY"
-  payload_format_version = "1.0"
-
-  connection_type = "VPC_LINK"
-  connection_id   = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
-}
-
 module "api_gateway_categories_routes" {
   source     = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/API-Gateway-Routes?ref=main"
   depends_on = [module.catalog_api]
