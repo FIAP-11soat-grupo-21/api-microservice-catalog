@@ -40,6 +40,7 @@ func Init() {
 
 	healthHandler := handlers.NewHealthHandler()
 	ginRouter.GET("/health", healthHandler.Health)
+	ginRouter.GET("/v1/health", healthHandler.Health)
 
 	v1Routes := ginRouter.Group("/v1")
 
