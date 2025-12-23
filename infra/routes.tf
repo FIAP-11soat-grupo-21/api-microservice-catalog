@@ -14,6 +14,8 @@ module "api_gateway_products_routes" {
   # vpc_link_id       = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
   # alb_listener_arn  = module.ALB.listener_arn
   gwapi_route_key = "ANY /v1/products/{proxy+}"
+  alb_proxy_id    = aws_apigatewayv2_integration.alb_proxy.id
+
 }
 
 module "api_gateway_categories_routes" {
@@ -23,6 +25,6 @@ module "api_gateway_categories_routes" {
   # vpc_link_id       = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
   # alb_listener_arn  = module.ALB.listener_arn
   gwapi_route_key = "ANY /v1/categories/{proxy+}"
-  # alb_proxy_id    = aws_apigatewayv2_integration.alb_proxy.id
+  alb_proxy_id    = aws_apigatewayv2_integration.alb_proxy.id
 }
 
