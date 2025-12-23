@@ -32,7 +32,7 @@ func (h *CategoryHandler) FindAllCategories(ctx *gin.Context) {
 	categories, err := h.categoryController.FindAll()
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -53,7 +53,7 @@ func (h *CategoryHandler) FindCategoryByID(ctx *gin.Context) {
 	category, err := h.categoryController.FindByID(categoryId)
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -80,7 +80,7 @@ func (h *CategoryHandler) CreateCategory(ctx *gin.Context) {
 	category, err := h.categoryController.Create(categoryRequestBody.ToDTO())
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -111,7 +111,7 @@ func (h *CategoryHandler) UpdateCategory(ctx *gin.Context) {
 	category, err := h.categoryController.Update(updateCategoryRequestBody.ToDTO(categoryId))
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -131,7 +131,7 @@ func (h *CategoryHandler) DeleteCategory(ctx *gin.Context) {
 	categoryId := ctx.Param("id")
 
 	if err := h.categoryController.Delete(categoryId); err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 

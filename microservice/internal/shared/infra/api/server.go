@@ -50,5 +50,7 @@ func Init() {
 	product_router.RegisterProductRoutes(v1Routes.Group("/products"))
 	product_router.RegisterCategoryRoutes(v1Routes.Group("/categories"))
 
-	ginRouter.Run(config.APIUrl)
+	if err := ginRouter.Run(config.APIUrl); err != nil {
+		log.Fatalf("failed to start gin server: %v", err)
+	}
 }

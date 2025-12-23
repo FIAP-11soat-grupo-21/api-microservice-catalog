@@ -15,7 +15,7 @@ func NewHealthHandler() *HealthHandler {
 
 func (h *HealthHandler) Health(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":    "OK - 2",
+		"status":    "OK - 3",
 		"timestamp": time.Now().UTC().Format(time.RFC3339),
 	})
 }

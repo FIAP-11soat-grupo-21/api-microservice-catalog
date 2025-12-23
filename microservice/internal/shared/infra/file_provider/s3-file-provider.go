@@ -25,22 +25,23 @@ func NewS3FileProvider(bucketName string) *S3FileProvider {
 		bucketName = cfgEnv.AWS.S3.BucketName
 	}
 
-	customResolver := aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
-		if service == s3.ServiceID {
-			return aws.Endpoint{
-				URL:               cfgEnv.AWS.S3.Endpoint,
-				SigningRegion:     region,
-				HostnameImmutable: true,
-			}, nil
-		}
-
-		return aws.Endpoint{}, fmt.Errorf("unknown endpoint requested")
-	})
+	customResolver := aws.EndpointResolverWithOptionsFunc( //nolint:staticcheck // AWS recomenda manter até nova alternativa
+		func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			if service == s3.ServiceID {
+				return aws.Endpoint{ //nolint:staticcheck
+					URL:               cfgEnv.AWS.S3.Endpoint,
+					SigningRegion:     region,
+					HostnameImmutable: true,
+				}, nil
+			}
+			return aws.Endpoint{}, fmt.Errorf("unknown endpoint requested") //nolint:staticcheck
+		})
 
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
 		config.WithRegion(cfgEnv.AWS.Region),
-		config.WithEndpointResolver(customResolver),
+		config.WithEndpointResolverWithOptions(customResolver), //nolint:staticcheck // AWS recomenda manter até nova alternativa
+
 	)
 
 	if err != nil {

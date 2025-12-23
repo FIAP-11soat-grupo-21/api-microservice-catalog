@@ -48,7 +48,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	productCreated, err := h.productController.Create(productRequestBody.ToDTO())
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *ProductHandler) FindAllProducts(ctx *gin.Context) {
 	products, err := h.productController.FindAll(categoryId)
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *ProductHandler) FindProductByID(ctx *gin.Context) {
 	product, err := h.productController.FindByID(productId)
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -131,7 +131,7 @@ func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 	product, err := h.productController.Update(productBodyRequest.ToDTO(productId))
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -196,7 +196,7 @@ func (h *ProductHandler) UploadProductImage(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -221,7 +221,7 @@ func (h *ProductHandler) DeleteProductImage(ctx *gin.Context) {
 	err := h.productController.DeleteImage(productId, imageFileName)
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -242,7 +242,7 @@ func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
 	err := h.productController.Delete(productId)
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
