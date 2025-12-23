@@ -38,11 +38,12 @@ func Init() {
 	ginRouter.Use(gin.Recovery())
 	ginRouter.Use(middlewares.ErrorHandlerMiddleware())
 
-	healthHandler := handlers.NewHealthHandler()
-	ginRouter.GET("/health", healthHandler.Health)
-	ginRouter.GET("/v1/health", healthHandler.Health)
+	// ginRouter.GET("/health", healthHandler.Health)
+	// ginRouter.GET("/v1/health", healthHandler.Health)
 
 	v1Routes := ginRouter.Group("/v1")
+	healthHandler := handlers.NewHealthHandler()
+	v1Routes.GET("/health", healthHandler.Health)
 
 	file_router.RegisterFileRoutes(v1Routes.Group("/uploads"))
 
