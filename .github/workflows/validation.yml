@@ -48,6 +48,10 @@ jobs:
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
           golangci-lint run --out-format json > golangci-lint-report.json
 
+      - name: Show GolangCI-Lint Report
+        working-directory: microservice
+        run: cat golangci-lint-report.json
+                  
       - name: Run Gosec Security Scanner
         working-directory: microservice
         run: |
