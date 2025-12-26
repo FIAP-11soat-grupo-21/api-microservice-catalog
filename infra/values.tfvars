@@ -50,7 +50,7 @@ api_endpoints = {
     restricted = false
   },
   post_category = {
-    route_key  = "POST /categories/"
+    route_key  = "POST /categories"
     restricted = false
   },
   delete_category = {
@@ -70,7 +70,7 @@ api_endpoints = {
     restricted = false
   },
   post_products = {
-    route_key  = "POST /products/"
+    route_key  = "POST /products"
     restricted = false
   },
   delete_product = {
