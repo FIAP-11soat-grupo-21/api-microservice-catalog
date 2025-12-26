@@ -43,7 +43,7 @@ func Init() {
 
 	v1Routes := ginRouter.Group("/v1")
 	healthHandler := handlers.NewHealthHandler()
-	v1Routes.GET("/health", healthHandler.Health)
+	ginRouter.GET("/health", healthHandler.Health)
 
 	file_router.RegisterFileRoutes(v1Routes.Group("/uploads"))
 

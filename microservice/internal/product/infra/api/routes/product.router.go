@@ -9,8 +9,8 @@ import (
 func RegisterProductRoutes(router *gin.RouterGroup) {
 	productHandler := handlers.NewProductHandler()
 
-	router.POST("/", productHandler.CreateProduct)
-	router.GET("/", productHandler.FindAllProducts)
+	router.POST("", productHandler.CreateProduct)
+	router.GET("", productHandler.FindAllProducts)
 	router.GET("/:id", productHandler.FindProductByID)
 	router.PUT("/:id", productHandler.UpdateProduct)
 	router.PATCH("/:id/images", productHandler.UploadProductImage)

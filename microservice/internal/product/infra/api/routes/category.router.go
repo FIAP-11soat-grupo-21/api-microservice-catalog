@@ -9,9 +9,9 @@ import (
 func RegisterCategoryRoutes(router *gin.RouterGroup) {
 	categoryHandler := handlers.NewCategoryHandler()
 
-	router.GET("/", categoryHandler.FindAllCategories)
+	router.GET("", categoryHandler.FindAllCategories)
 	router.GET("/:id", categoryHandler.FindCategoryByID)
-	router.POST("/", categoryHandler.CreateCategory)
+	router.POST("", categoryHandler.CreateCategory)
 	router.PUT("/:id", categoryHandler.UpdateCategory)
 	router.DELETE("/:id", categoryHandler.DeleteCategory)
 }
