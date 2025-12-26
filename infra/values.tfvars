@@ -44,5 +44,37 @@ api_endpoints = {
   get_all_categories = {
     route_key  = "GET /categories"
     restricted = false
+  },
+  put_category = {
+    route_key  = "PUT /categories/{id}"
+    restricted = false
+  },
+  post_category = {
+    route_key  = "POST /categories/"
+    restricted = false
+  },
+  delete_category = {
+    route_key  = "DELETE /categories/{id}"
+    restricted = false
+  },
+  get_product = {
+    route_key  = "GET /products/{id}"
+    restricted = false
+  },
+  get_all_products = {
+    route_key  = "GET /products"
+    restricted = false
+  },
+  put_products = {
+    route_key  = "PUT /products/{id}"
+    restricted = false
+  },
+  post_products = {
+    route_key  = "POST /products/"
+    restricted = false
+  },
+  delete_product = {
+    route_key  = "DELETE /products/{id}"
+    restricted = false
   }
 }
