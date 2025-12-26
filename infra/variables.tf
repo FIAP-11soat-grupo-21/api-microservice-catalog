@@ -41,3 +41,13 @@ variable "task_role_policy_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "api_endpoints" {
+  description = "Lista de endpoints da API Gateway"
+  type = map(object({
+    route_key           = string
+    target              = optional(string)
+    restricted          = optional(bool, false)
+    auth_integration_id = optional(string)
+  }))
+}

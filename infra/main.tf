@@ -6,7 +6,6 @@ module "ALB" {
   is_internal        = true
   private_subnet_ids = data.terraform_remote_state.infra.outputs.private_subnet_ids
   vpc_id             = data.terraform_remote_state.infra.outputs.vpc_id
-  vpc_cidr_blocks    = [data.terraform_remote_state.infra.outputs.vpc_cdir_block]
 
   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
 }

@@ -1,6 +1,10 @@
 application_name = "catalog-api"
 image_name       = "GHCR_IMAGE_TAG"
 image_port       = 8080
+
+# =======================================================
+# Configurações do ECS Service
+# =======================================================
 container_environment_variables = {
   GO_ENV : "production"
   API_PORT : "8080"
@@ -28,3 +32,17 @@ task_role_policy_arns = [
   "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
   "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 ]
+
+# =======================================================
+# Configurações do API Gateaway
+# =======================================================
+api_endpoints = {
+  get_category = {
+    route_key  = "GET /categories/{id}"
+    restricted = false
+  },
+  get_all_categories = {
+    route_key  = "GET /categories"
+    restricted = false
+  }
+}
