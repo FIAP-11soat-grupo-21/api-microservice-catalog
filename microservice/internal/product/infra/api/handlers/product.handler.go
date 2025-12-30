@@ -3,8 +3,10 @@ package handlers
 import (
 	"io"
 	"net/http"
+	"strings"
 	"tech_challenge/internal/product/application/controllers"
 	"tech_challenge/internal/product/application/dtos"
+	"tech_challenge/internal/product/domain/exceptions"
 	"tech_challenge/internal/product/infra/api/schemas"
 	"tech_challenge/internal/product/infra/database/data_sources"
 	shared_factories "tech_challenge/internal/shared/factories"
@@ -48,7 +50,12 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	productCreated, err := h.productController.Create(productRequestBody.ToDTO())
 
 	if err != nil {
-		_ = ctx.Error(err)
+		// Trata erro de chave estrangeira do Postgres
+		if strings.Contains(err.Error(), "SQLSTATE 23503") {
+			ctx.JSON(400, gin.H{"error": "Categoria não encontrada para o produto"})
+			return
+		}
+		ctx.JSON(500, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -196,7 +203,11 @@ func (h *ProductHandler) UploadProductImage(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		_ = ctx.Error(err)
+		if _, ok := err.(*exceptions.BucketNotFoundException); ok {
+			ctx.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(400, gin.H{"error": "Invalid product image"})
 		return
 	}
 

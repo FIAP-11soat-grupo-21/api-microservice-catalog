@@ -1,8 +1,8 @@
 package entities
 
 import (
+	// "fmt"
 	"slices"
-
 	"tech_challenge/internal/product/domain/exceptions"
 	value_objects "tech_challenge/internal/product/domain/value-objects"
 )
@@ -13,28 +13,27 @@ type Product struct {
 	Name        value_objects.Name
 	Description string
 	Price       value_objects.Price
-	Images      []value_objects.Image
+	Images      []*value_objects.Image
 	Active      bool
 }
 
 func NewProduct(id, categoryID, name, description string, price float64, active bool) (*Product, error) {
 	productName, err := value_objects.NewName(name)
-
 	if err != nil {
 		return nil, err
 	}
 
 	productPrice, err := value_objects.NewPrice(price)
-
 	if err != nil {
 		return nil, err
 	}
 
 	defaultImage, err := value_objects.NewImageDefault()
-
 	if err != nil {
 		return nil, err
 	}
+
+	defaultImagePtr := &defaultImage
 
 	return &Product{
 		ID:          id,
@@ -42,7 +41,7 @@ func NewProduct(id, categoryID, name, description string, price float64, active 
 		Name:        productName,
 		Description: description,
 		Price:       productPrice,
-		Images:      []value_objects.Image{defaultImage},
+		Images:      []*value_objects.Image{defaultImagePtr},
 		Active:      active,
 	}, nil
 }
@@ -68,16 +67,16 @@ func NewProductWithImages(
 		return nil, err
 	}
 
-	productImages := make([]value_objects.Image, len(images))
+	productImages := make([]*value_objects.Image, len(images))
 
 	for i, img := range images {
-		image, err := value_objects.NewImageWithFileNameAndUrl(img.FileName, img.Url)
+		image, err := value_objects.NewImageWithFileNameAndUrl(img.FileName, img.Url, false)
 
 		if err != nil {
 			return nil, err
 		}
 
-		productImages[i] = image
+		productImages[i] = &image
 	}
 
 	return &Product{
@@ -132,15 +131,12 @@ func (c *Product) SetCategory(categoryId string) error {
 }
 
 func (c *Product) AddImage(originalFileName string) (*string, error) {
-	image, err := value_objects.NewImage(originalFileName)
-
+	img, err := value_objects.NewImage(originalFileName)
 	if err != nil {
 		return nil, err
 	}
-
-	c.Images = append(c.Images, image)
-
-	return &image.FileName, nil
+	c.Images = append(c.Images, &img)
+	return &img.FileName, nil
 }
 
 func (c *Product) RemoveImage(fileName string) error {
@@ -164,7 +160,7 @@ func (c *Product) RemoveImage(fileName string) error {
 
 func (c *Product) ImageIsDefault(imageFileName string) bool {
 	for _, img := range c.Images {
-		if img.FileName == imageFileName && img.IsDefault() {
+		if img.FileName == imageFileName && img.IsDefault {
 			return true
 		}
 	}
@@ -173,4 +169,10 @@ func (c *Product) ImageIsDefault(imageFileName string) bool {
 
 func (c *Product) IsEmpty() bool {
 	return c.ID == ""
+}
+
+func (p *Product) SetPreviousImagesAsNotDefault() {
+	for i := 0; i < len(p.Images)-1; i++ {
+		p.Images[i].IsDefault = false
+	}
 }

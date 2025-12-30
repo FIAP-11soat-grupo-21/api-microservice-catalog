@@ -3,13 +3,16 @@ package file_service
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go"
 
+	"tech_challenge/internal/product/domain/exceptions"
 	"tech_challenge/internal/shared/config/env"
 )
 
@@ -62,6 +65,10 @@ func (s *S3FileProvider) UploadFile(fileName string, fileContent []byte) error {
 	})
 
 	if err != nil {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NoSuchBucket" {
+			return &exceptions.BucketNotFoundException{}
+		}
 		return err
 	}
 

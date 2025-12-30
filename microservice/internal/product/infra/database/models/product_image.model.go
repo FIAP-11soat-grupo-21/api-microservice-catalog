@@ -7,10 +7,10 @@ import "time"
 //
 type ProductImageModel struct {
 	ID        string    `gorm:"primaryKey;size:36"`
-	ProductID string    `gorm:"not null;size:36;index"`
-	FileName  string    `gorm:"not null"`
-	Url       string    `gorm:"not null"`
-	IsDefault bool      `gorm:"default:false"`
+	ProductID string    `gorm:"not null;index;constraint:OnDelete:CASCADE"`
+	FileName  string    `gorm:"not null;size:255"`
+	Url       string    `gorm:"not null;size:2048"`
+	IsDefault bool      `gorm:"not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 

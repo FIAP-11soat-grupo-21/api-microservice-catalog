@@ -1,6 +1,7 @@
 package use_cases
 
 import (
+	"fmt"
 	"tech_challenge/internal/product/application/dtos"
 	"tech_challenge/internal/product/application/gateways"
 	"tech_challenge/internal/product/domain/exceptions"
@@ -17,29 +18,34 @@ func NewUploadProductImageUseCase(gateway gateways.ProductGateway) *UploadProduc
 }
 
 func (uc *UploadProductImageUseCase) Execute(productDTO dtos.UploadProductImageDTO) error {
+	fmt.Println("[UploadProductImageUseCase] Recebido DTO:", productDTO)
 	product, err := uc.gateway.FindByID(productDTO.ProductID)
-
 	if err != nil {
+		fmt.Printf("[UploadProductImageUseCase] Produto não encontrado: %v\n", err)
 		return &exceptions.ProductNotFoundException{}
 	}
 
 	newFileName, err := product.AddImage(productDTO.FileName)
-
 	if err != nil {
-		return err
-	}
-
-	err = uc.gateway.UploadImage(*newFileName, productDTO.FileContent)
-
-	if err != nil {
+		fmt.Printf("[UploadProductImageUseCase] Erro ao adicionar imagem: %v\n", err)
 		return &exceptions.InvalidProductImageException{}
 	}
 
-	err = uc.gateway.Update(product)
-
+	fmt.Println("[UploadProductImageUseCase] Nome do arquivo gerado:", *newFileName)
+	url, err := uc.gateway.UploadImage(*newFileName, productDTO.FileContent)
 	if err != nil {
+		fmt.Printf("[UploadProductImageUseCase] Erro ao fazer upload: %v\n", err)
+		if _, ok := err.(*exceptions.BucketNotFoundException); ok {
+			return err
+		}
+		return &exceptions.InvalidProductImageException{}
+	}
+
+	if err := uc.gateway.AddAndSetDefaultImage(product, url); err != nil {
+		fmt.Printf("[UploadProductImageUseCase] Erro ao inserir/atualizar imagem no banco: %v\n", err)
 		return &exceptions.InvalidProductDataException{}
 	}
 
+	fmt.Println("[UploadProductImageUseCase] Upload finalizado com sucesso!")
 	return nil
 }

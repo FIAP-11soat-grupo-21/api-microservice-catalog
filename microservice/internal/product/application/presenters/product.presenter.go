@@ -8,34 +8,33 @@ import (
 
 func ProductFromDomainToResultDTO(product entities.Product) dtos.ProductResultDTO {
 	productImages := make([]dtos.ProductImageDTO, len(product.Images))
-
 	for i, img := range product.Images {
-		productImages[i] = productImageFromDomainToDTO(img)
+		productImages[i] = productImageFromDomainToDTO(*img)
 	}
-
 	return dtos.ProductResultDTO{
 		ID:          product.ID,
 		Name:        product.Name.Value(),
 		Description: product.Description,
 		Price:       product.Price.Value(),
-		Images:      productImages,
+		Active:      product.Active,
 		CategoryID:  product.CategoryID,
+		Images:      productImages,
 	}
 }
 
 func ListProductDomainToResultDTO(products []entities.Product) []dtos.ProductResultDTO {
-	productDTOs := make([]dtos.ProductResultDTO, 0, len(products))
-
-	for _, p := range products {
-		productDTOs = append(productDTOs, ProductFromDomainToResultDTO(p))
+	result := make([]dtos.ProductResultDTO, len(products))
+	for i, p := range products {
+		result[i] = ProductFromDomainToResultDTO(p)
 	}
-
-	return productDTOs
+	return result
 }
 
 func productImageFromDomainToDTO(image value_objects.Image) dtos.ProductImageDTO {
 	return dtos.ProductImageDTO{
-		FileName: image.FileName,
-		Url:      image.Url,
+		ID:        image.ID,
+		FileName:  image.FileName,
+		Url:       image.Url,
+		IsDefault: image.IsDefault,
 	}
 }

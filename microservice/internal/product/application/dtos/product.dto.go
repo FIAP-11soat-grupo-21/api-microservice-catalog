@@ -24,8 +24,10 @@ type UploadProductImageDTO struct {
 }
 
 type ProductImageDTO struct {
-	FileName string
-	Url      string
+	ID        string
+	FileName  string
+	Url       string
+	IsDefault bool
 }
 
 type ProductResultDTO struct {

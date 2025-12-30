@@ -21,27 +21,40 @@ func NewProductDataSource() *GormProductDataSource {
 
 func (r *GormProductDataSource) Insert(productDAO daos.ProductDAO) error {
 	productModel := mappers.FromProductDAOToProductModel(productDAO)
+	err := r.db.Create(&productModel).Error
+	if err != nil {
+		return err
+	}
 
-	return r.db.Model(&models.ProductModel{}).Create(&productModel).Error
+	if len(productDAO.Images) > 0 {
+		img := productDAO.Images[0]
+		img.ProductID = productModel.ID
+		if err := r.AddProductImage(img); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *GormProductDataSource) FindAll() ([]daos.ProductDAO, error) {
 	var products []*models.ProductModel
-
-	if err := r.db.Preload("Images").Find(&products).Error; err != nil {
+	err := r.db.Preload("Images", func(db *gorm.DB) *gorm.DB {
+		return db.Where("is_default = ?", true).Order("created_at desc")
+	}).Find(&products).Error
+	if err != nil {
 		return nil, err
 	}
-
 	return mappers.ArrayFromProductModelToProductDAO(products)
 }
 
 func (r *GormProductDataSource) FindAllByCategoryID(categoryID string) ([]daos.ProductDAO, error) {
 	var products []*models.ProductModel
-
-	if err := r.db.Preload("Images").Where("category_id = ?", categoryID).Find(&products).Error; err != nil {
+	err := r.db.Preload("Images", func(db *gorm.DB) *gorm.DB {
+		return db.Where("is_default = ?", true).Order("created_at desc")
+	}).Where("category_id = ?", categoryID).Find(&products).Error
+	if err != nil {
 		return nil, err
 	}
-
 	return mappers.ArrayFromProductModelToProductDAO(products)
 }
 
@@ -61,4 +74,22 @@ func (r *GormProductDataSource) Update(product daos.ProductDAO) error {
 
 func (r *GormProductDataSource) Delete(id string) error {
 	return r.db.Delete(&models.ProductModel{}, "id = ?", id).Error
+}
+
+func (r *GormProductDataSource) AddProductImage(productImage daos.ProductImageDAO) error {
+	return r.db.Create(&productImage).Error
+}
+
+func (r *GormProductDataSource) UpdateProductImage(productImage daos.ProductImageDAO) error {
+	return r.db.Model(&daos.ProductImageDAO{}).
+		Where("id = ? AND product_id = ?", productImage.ID, productImage.ProductID).
+		Updates(map[string]interface{}{
+			"is_default": productImage.IsDefault,
+		}).Error
+}
+
+func (r *GormProductDataSource) SetPreviousImagesAsNotDefault(productID, exceptImageID string) error {
+	return r.db.Model(&models.ProductImageModel{}).
+		Where("product_id = ? AND id <> ?", productID, exceptImageID).
+		Update("is_default", false).Error
 }
