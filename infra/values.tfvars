@@ -76,5 +76,13 @@ api_endpoints = {
   delete_product = {
     route_key  = "DELETE /products/{id}"
     restricted = false
+  },
+  patch_product_image = {
+    route_key  = "PATCH /products/{id}/images"
+    restricted = false
+  },
+  delete_product_image = {
+    route_key  = "DELETE /products/{id}/images/{image_file_name}"
+    restricted = false
   }
 }
