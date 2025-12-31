@@ -58,6 +58,7 @@ func NewS3FileProvider(bucketName string) *S3FileProvider {
 }
 
 func (s *S3FileProvider) UploadFile(fileName string, fileContent []byte) error {
+
 	_, err := s.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(fileName),
@@ -69,7 +70,7 @@ func (s *S3FileProvider) UploadFile(fileName string, fileContent []byte) error {
 		if errors.As(err, &apiErr) && apiErr.ErrorCode() == "NoSuchBucket" {
 			return &exceptions.BucketNotFoundException{}
 		}
-		return err
+		return fmt.Errorf("erro ao fazer upload no S3: %w", err)
 	}
 
 	return nil

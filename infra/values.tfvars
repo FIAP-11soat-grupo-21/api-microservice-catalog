@@ -18,12 +18,7 @@ container_environment_variables = {
   AWS_REGION : "us-east-2"
   AWS_S3_BUCKET_NAME : "product-photo-fiap-tech-challenge-catalog"
   AWS_S3_PRESIGN_EXPIRATION : "5m"
-  AWS_S3_ENDPOINT : "http://minio:9000"
-  # COLLECTOR_ID : "2456291815"
-  # EXTERNAL_POS_ID : "tccaixafiapf1"
-  # MERCADOPAGO_API_URL : "https://api.mercadopago.com"
-  # ACCESS_TOKEN : "valor",
-  # GOOGLE_PROJECT_ID : "fiap-tech-challenge",
+  AWS_S3_ENDPOINT : ""
 }
 container_secrets = {}
 health_check_path = "/health"
@@ -83,6 +78,14 @@ api_endpoints = {
   },
   delete_product_image = {
     route_key  = "DELETE /products/{id}/images/{image_file_name}"
+    restricted = false
+  },
+  health = {
+    route_key  = "GET /health"
+    restricted = false
+  },
+  v1_health = {
+    route_key  = "GET /v1/health"
     restricted = false
   }
 }
