@@ -53,6 +53,10 @@ func getEnv(key string) string {
 	return value
 }
 
+func getEnvOptional(key string) string {
+	return os.Getenv(key)
+}
+
 func (c *Config) Load() {
 	dotEnvPath := ".env"
 	_, err := os.Stat(dotEnvPath)
@@ -81,7 +85,7 @@ func (c *Config) Load() {
 	c.AWS.Region = getEnv("AWS_REGION")
 
 	c.AWS.S3.BucketName = getEnv("AWS_S3_BUCKET_NAME")
-	c.AWS.S3.Endpoint = getEnv("AWS_S3_ENDPOINT")
+	c.AWS.S3.Endpoint = getEnvOptional("AWS_S3_ENDPOINT")
 	c.AWS.S3.PresignExpiration = getEnv("AWS_S3_PRESIGN_EXPIRATION")
 }
 
