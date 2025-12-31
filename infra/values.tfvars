@@ -16,7 +16,7 @@ container_environment_variables = {
   DB_PORT : "5432"
   DB_USERNAME : "adminuser"
   AWS_REGION : "us-east-2"
-  AWS_S3_BUCKET_NAME : "product-photo-fiap-tech-challenge"
+  AWS_S3_BUCKET_NAME : "product-photo-fiap-tech-challenge-catalog"
   AWS_S3_PRESIGN_EXPIRATION : "5m"
   AWS_S3_ENDPOINT : "http://minio:9000"
   # COLLECTOR_ID : "2456291815"
