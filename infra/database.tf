@@ -14,7 +14,6 @@ module "app_db" {
   vpc_id          = data.terraform_remote_state.infra.outputs.vpc_id
 }
 
-# outputs que você poderá usar na aplicação
 output "db_address" {
   value = module.app_db.db_connection
 }

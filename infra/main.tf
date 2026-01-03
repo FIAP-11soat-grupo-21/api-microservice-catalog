@@ -1,59 +1,122 @@
-# module "ALB" {
-#   source             = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/ALB?ref=main"
-#   loadbalancer_name  = var.application_name
-#   health_check_path  = var.health_check_path
-#   app_port           = var.image_port
-#   is_internal        = true
-#   private_subnet_ids = data.terraform_remote_state.infra.outputs.private_subnet_ids
-#   vpc_id             = data.terraform_remote_state.infra.outputs.vpc_id
+module "catalog_api" {
+  source = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/ECS-Service?ref=main"
 
-#   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
-# }
+  cluster_id            = data.terraform_remote_state.infra.outputs.ecs_cluster_id
+  ecs_security_group_id = data.terraform_remote_state.infra.outputs.ecs_security_group_id
 
-# module "catalog_api" {
-#   source = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/ECS-Service?ref=main"
+  cloudwatch_log_group     = data.terraform_remote_state.infra.outputs.ecs_cloudwatch_log_group
+  ecs_container_image      = var.image_name
+  ecs_container_name       = var.application_name
+  ecs_container_port       = var.image_port
+  ecs_service_name         = var.application_name
+  ecs_desired_count        = var.desired_count
+  registry_credentials_arn = data.terraform_remote_state.infra.outputs.ecr_registry_credentials_arn
 
-#   cluster_id            = data.terraform_remote_state.infra.outputs.ecs_cluster_id
-#   ecs_security_group_id = data.terraform_remote_state.infra.outputs.ecs_security_group_id
+  ecs_container_environment_variables = merge(
+    var.container_environment_variables,
+    {
+      DB_HOST        = module.app_db.db_connection,
+      API_UPLOAD_URL = module.s3_bucket.bucket_regional_domain_name != "" ? "https://${module.s3_bucket.bucket_regional_domain_name}" : ""
+    }
+  )
 
-#   cloudwatch_log_group     = data.terraform_remote_state.infra.outputs.ecs_cloudwatch_log_group
-#   ecs_container_image      = var.image_name
-#   ecs_container_name       = var.application_name
-#   ecs_container_port       = var.image_port
-#   ecs_service_name         = var.application_name
-#   ecs_desired_count        = var.desired_count
-#   registry_credentials_arn = data.terraform_remote_state.infra.outputs.ecr_registry_credentials_arn
+  ecs_container_secrets = merge(var.container_secrets,
+    {
+      DB_PASSWORD : module.app_db.db_secret_password_arn
+    }
+  )
 
-#   ecs_container_environment_variables = merge(
-#     var.container_environment_variables,
-#     {
-#       DB_HOST = module.app_db.db_connection
-#     }
-#   )
+  private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_ids
+  task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
+  task_role_policy_arns   = var.task_role_policy_arns
+  alb_target_group_arn    = data.terraform_remote_state.infra.outputs.alb_target_group_arn
+  alb_security_group_id   = data.terraform_remote_state.infra.outputs.alb_security_group_id
 
-#   ecs_container_secrets = merge(var.container_secrets,
-#     {
-#       DB_PASSWORD : module.app_db.db_secret_password_arn
-#     }
-#   )
+  project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
+}
 
-#   private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_ids
-#   task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
-#   task_role_policy_arns   = var.task_role_policy_arns
-#   alb_target_group_arn    = module.ALB.target_group_arn
-#   alb_security_group_id   = module.ALB.alb_security_group_id
+module "GetCatalogAPIRoute" {
+  source     = "git::https://github.com/FIAP-11soat-grupo-21/infra-core.git//modules/API-Gateway-Routes?ref=main"
+  depends_on = [module.catalog_api, ]
 
-#   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
-# }
+  api_id       = data.terraform_remote_state.infra.outputs.api_gateway_id
+  alb_proxy_id = aws_apigatewayv2_integration.alb_proxy.id
 
-# resource "aws_apigatewayv2_integration" "alb_proxy" {
-#   api_id           = data.terraform_remote_state.infra.outputs.api_gateway_id
-#   integration_type = "HTTP_PROXY"
-
-#   integration_uri        = module.ALB.listener_arn
-#   integration_method     = "ANY"
-#   payload_format_version = "1.0"
-
-#   connection_type = "VPC_LINK"
-#   connection_id   = data.terraform_remote_state.infra.outputs.api_gateway_vpc_link_id
-# }
+  endpoints = {
+    get_category = {
+      route_key           = "GET /categories/{id}"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    get_all_categories = {
+      route_key           = "GET /categories"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    create_category = {
+      route_key           = "POST /categories"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },    
+    update_category = {
+      route_key           = "PUT /categories/{id}"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    delete_category = {
+      route_key           = "DELETE /categories/{id}"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    get_product = {
+      route_key           = "GET /products/{id}"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    get_all_product = {
+      route_key           = "GET /products"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    create_product = {
+      route_key           = "POST /products"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },      
+    update_product = {
+      route_key           = "PUT /products/{id}"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    delete_product = {
+      route_key           = "DELETE /products/{id}"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    patch_product_image = {
+      route_key           = "PATCH /products/{id}/images"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    delete_product_image = {
+      route_key           = "DELETE /products/{id}/images"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    get_product_images = {
+      route_key           = "GET /products/{id}/images"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    health = {
+      route_key           = "GET /health"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+    v1_health = {
+      route_key           = "GET /v1/health"
+      restricted          = false
+      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    },
+  }
+}
