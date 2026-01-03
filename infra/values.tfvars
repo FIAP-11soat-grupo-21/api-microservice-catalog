@@ -41,65 +41,65 @@ apigw_connection_type        = "VPC_LINK"
 
 authorization_name = "CognitoAuthorizer"
 
-api_endpoints = {
-  get_category = {
-    route_key  = "GET /categories/{id}"
-    restricted = false
-  },
-  get_all_categories = {
-    route_key  = "GET /categories"
-    restricted = false
-  },
-  put_category = {
-    route_key  = "PUT /categories/{id}"
-    restricted = false
-  },
-  post_category = {
-    route_key  = "POST /categories"
-    restricted = false
-  },
-  delete_category = {
-    route_key  = "DELETE /categories/{id}"
-    restricted = false
-  },
-  get_product = {
-    route_key  = "GET /products/{id}"
-    restricted = false
-  },
-  get_all_products = {
-    route_key  = "GET /products"
-    restricted = false
-  },
-  put_products = {
-    route_key  = "PUT /products/{id}"
-    restricted = false
-  },
-  post_products = {
-    route_key  = "POST /products"
-    restricted = false
-  },
-  delete_product = {
-    route_key  = "DELETE /products/{id}"
-    restricted = false
-  },
-  patch_product_image = {
-    route_key  = "PATCH /products/{id}/images"
-    restricted = false
-  },
-  delete_product_image = {
-    route_key  = "DELETE /products/{id}/images/{image_file_name}"
-    restricted = false
-  },
-  get_product_images = {
-    route_key  = "GET /products/{id}/images"
-    restricted = false
-  },
-  health = {
-    route_key  = "GET /health"
-    restricted = false
-  },
-  v1_health = {
-    route_key  = "GET /v1/health"
-    restricted = false
-  }
-}
+# api_endpoints = {
+#   get_category = {
+#     route_key  = "GET /categories/{id}"
+#     restricted = false
+#   },
+#   get_all_categories = {
+#     route_key  = "GET /categories"
+#     restricted = false
+#   },
+#   put_category = {
+#     route_key  = "PUT /categories/{id}"
+#     restricted = false
+#   },
+#   post_category = {
+#     route_key  = "POST /categories"
+#     restricted = false
+#   },
+#   delete_category = {
+#     route_key  = "DELETE /categories/{id}"
+#     restricted = false
+#   },
+#   get_product = {
+#     route_key  = "GET /products/{id}"
+#     restricted = false
+#   },
+#   get_all_products = {
+#     route_key  = "GET /products"
+#     restricted = false
+#   },
+#   put_products = {
+#     route_key  = "PUT /products/{id}"
+#     restricted = false
+#   },
+#   post_products = {
+#     route_key  = "POST /products"
+#     restricted = false
+#   },
+#   delete_product = {
+#     route_key  = "DELETE /products/{id}"
+#     restricted = false
+#   },
+#   patch_product_image = {
+#     route_key  = "PATCH /products/{id}/images"
+#     restricted = false
+#   },
+#   delete_product_image = {
+#     route_key  = "DELETE /products/{id}/images/{image_file_name}"
+#     restricted = false
+#   },
+#   get_product_images = {
+#     route_key  = "GET /products/{id}/images"
+#     restricted = false
+#   },
+#   health = {
+#     route_key  = "GET /health"
+#     restricted = false
+#   },
+#   v1_health = {
+#     route_key  = "GET /v1/health"
+#     restricted = false
+#   }
+# }

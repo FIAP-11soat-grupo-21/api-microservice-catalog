@@ -78,10 +78,6 @@ module "GetCatalogAPIRoute" {
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
-    create_category = {
-      route_key  = "POST /categories"
-      restricted = false
-    },
     update_product = {
       route_key           = "PUT /products/{id}"
       restricted          = false
