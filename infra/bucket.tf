@@ -4,5 +4,5 @@ module "s3_bucket" {
   bucket_name         = "product-photo-fiap-tech-challenge-catalog"
   enable_versioning   = true
   enable_encryption   = true
-  project_common_tags = { Environment = var.environment }
+  project_common_tags  = { Project = "catalog" }
 }
