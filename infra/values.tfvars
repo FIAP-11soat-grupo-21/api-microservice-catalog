@@ -31,8 +31,13 @@ task_role_policy_arns = [
 ]
 
 # =======================================================
-# Configurações do API Gateaway
+# Configurações do API away
 # =======================================================
+apigw_integration_type       = "HTTP_PROXY"
+apigw_integration_method     = "ANY"
+apigw_payload_format_version = "1.0"
+apigw_connection_type        = "VPC_LINK"
+
 api_endpoints = {
   get_category = {
     route_key  = "GET /categories/{id}"
