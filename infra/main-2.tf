@@ -53,13 +53,13 @@ module "GetCatalogAPIRoute" {
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
-    put_category = {
-      route_key           = "PUT /categories/{id}"
+    create_category = {
+      route_key           = "POST /categories"
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-    },
-    post_category = {
-      route_key           = "POST /categories"
+    },    
+    update_category = {
+      route_key           = "PUT /categories/{id}"
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
@@ -67,10 +67,6 @@ module "GetCatalogAPIRoute" {
       route_key           = "DELETE /categories/{id}"
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-    },
-    create_category = {
-      route_key  = "POST /categories"
-      restricted = false
     },
     get_product = {
       route_key           = "GET /products/{id}"
@@ -82,13 +78,12 @@ module "GetCatalogAPIRoute" {
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
-    put_product = {
-      route_key           = "PUT /products/{id}"
-      restricted          = false
-      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    create_category = {
+      route_key  = "POST /categories"
+      restricted = false
     },
-    post_product = {
-      route_key           = "POST /products"
+    update_product = {
+      route_key           = "PUT /products/{id}"
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
@@ -103,7 +98,7 @@ module "GetCatalogAPIRoute" {
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     delete_product_image = {
-      route_key           = "PATCH /products/{id}/images"
+      route_key           = "DELETE /products/{id}/images"
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
