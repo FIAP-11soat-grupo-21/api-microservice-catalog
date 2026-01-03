@@ -29,8 +29,8 @@ module "catalog_api" {
   private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_ids
   task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
   task_role_policy_arns   = var.task_role_policy_arns
-  alb_target_group_arn    = module.ALB.target_group_arn
-  alb_security_group_id   = module.ALB.alb_security_group_id
+  alb_target_group_arn    = data.terraform_remote_state.infra.outputs.alb_target_group_arn
+  alb_security_group_id   = data.terraform_remote_state.infra.outputs.alb_security_group_id
 
   project_common_tags = data.terraform_remote_state.infra.outputs.project_common_tags
 }
