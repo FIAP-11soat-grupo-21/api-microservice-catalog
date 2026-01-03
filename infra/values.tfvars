@@ -1,6 +1,7 @@
 application_name = "catalog-api"
 image_name       = "GHCR_IMAGE_TAG"
 image_port       = 8080
+app_path_pattern = ["/products*", "/products/*", "/categories*", "/categories/*"]
 
 # =======================================================
 # Configurações do ECS Service
