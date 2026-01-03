@@ -39,6 +39,8 @@ apigw_integration_method     = "ANY"
 apigw_payload_format_version = "1.0"
 apigw_connection_type        = "VPC_LINK"
 
+authorization_name = "CognitoAuthorizer"
+
 api_endpoints = {
   get_category = {
     route_key  = "GET /categories/{id}"
