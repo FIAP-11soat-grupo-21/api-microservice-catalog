@@ -10,7 +10,7 @@ container_environment_variables = {
   API_PORT : "8080"
   API_HOST : "0.0.0.0"
   AWS_REGION : "us-east-2"
-  API_UPLOAD_URL : "http://minio:9000"
+
   DB_RUN_MIGRATIONS : "true"
   DB_NAME : "postgres"
   DB_PORT : "5432"
@@ -19,6 +19,8 @@ container_environment_variables = {
   AWS_S3_BUCKET_NAME : "product-photo-fiap-tech-challenge-catalog"
   AWS_S3_PRESIGN_EXPIRATION : "5m"
   AWS_S3_ENDPOINT : ""
+  # API_UPLOAD_URL será preenchida automaticamente pelo Terraform no main-2.tf usando o output do módulo S3
+  # Exemplo de valor: https://product-photo-fiap-tech-challenge-catalog.s3.us-east-2.amazonaws.com
 }
 container_secrets = {}
 health_check_path = "/health"
