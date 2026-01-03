@@ -190,7 +190,6 @@ func (g *ProductGateway) DeleteImage(fileName string) error {
 func (g *ProductGateway) GetImageUrl(fileName string) string {
 	url, err := g.fileService.GetPresignedURL(fileName)
 	if err != nil {
-		// fallback local ou log de erro
 		return ""
 	}
 	return url
@@ -198,10 +197,6 @@ func (g *ProductGateway) GetImageUrl(fileName string) string {
 
 func (g *ProductGateway) AddProductImage(img daos.ProductImageDAO) error {
 	return g.dataSource.AddProductImage(img)
-}
-
-func (g *ProductGateway) UpdateProductImage(img daos.ProductImageDAO) error {
-	return g.dataSource.UpdateProductImage(img)
 }
 
 func (g *ProductGateway) SetProductImageAsDefault(product entities.Product, img *value_objects.Image) error {
@@ -218,7 +213,7 @@ func (g *ProductGateway) SetProductImageAsDefault(product entities.Product, img 
 		return err
 	}
 	// Atualiza todas as outras imagens para is_default = false
-	return g.dataSource.SetPreviousImagesAsNotDefault(product.ID, img.ID)
+	return g.dataSource.SetAllPreviousImagesAsNotDefault(product.ID, img.ID)
 }
 
 func (g *ProductGateway) AddAndSetDefaultImage(product entities.Product, url string) error {
@@ -239,5 +234,66 @@ func (g *ProductGateway) AddAndSetDefaultImage(product entities.Product, url str
 	if err := g.dataSource.AddProductImage(imgDAO); err != nil {
 		return err
 	}
-	return g.dataSource.SetPreviousImagesAsNotDefault(product.ID, img.ID)
+	return g.dataSource.SetAllPreviousImagesAsNotDefault(product.ID, img.ID)
+}
+
+func (g *ProductGateway) FindAllImagesProductById(productId string) (entities.Product, error) {
+	imageDAOs, err := g.dataSource.FindAllImagesProductById(productId)
+	if err != nil {
+		return entities.Product{}, err
+	}
+	productImages := make([]*value_objects.Image, len(imageDAOs))
+	for i, img := range imageDAOs {
+		productImages[i] = &value_objects.Image{
+			FileName:  img.FileName,
+			Url:       img.Url,
+			CreatedAt: img.CreatedAt,
+			ID:        img.ID,
+			IsDefault: img.IsDefault,
+		}
+	}
+	product := entities.Product{
+		ID:     productId,
+		Images: productImages,
+	}
+	return product, nil
+}
+
+func (g *ProductGateway) SetLastImageAsDefault(productID, exceptImageFileName string) error {
+	imageDAOs, err := g.dataSource.FindAllImagesProductById(productID)
+	if err != nil {
+		return err
+	}
+	var lastImage *daos.ProductImageDAO
+	for i := range imageDAOs {
+		if imageDAOs[i].FileName == exceptImageFileName {
+			continue
+		}
+		if lastImage == nil || imageDAOs[i].CreatedAt.After(lastImage.CreatedAt) {
+			lastImage = &imageDAOs[i]
+		}
+	}
+	if lastImage == nil {
+		return nil
+	}
+	return g.dataSource.SetImageAsDefault(productID, lastImage.ID)
+}
+
+func (g *ProductGateway) DeleteProductImage(imageFileName string) error {
+	return g.dataSource.DeleteImage(imageFileName)
+}
+
+func (g *ProductGateway) DeleteFiles(images []*value_objects.Image) error {
+	fileNames := make([]string, 0, len(images))
+	for _, img := range images {
+		if img.FileName != value_objects.DEFAULT_IMAGE_FILE_NAME {
+			fileNames = append(fileNames, img.FileName)
+		}
+	}
+	return g.fileService.DeleteFiles(fileNames)
+}
+
+func (g *ProductGateway) DeleteImagesFromBucket(images []*value_objects.Image) error {
+
+	return nil
 }

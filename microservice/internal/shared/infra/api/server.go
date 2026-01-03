@@ -11,7 +11,6 @@ import (
 	"tech_challenge/internal/shared/config/env"
 	"tech_challenge/internal/shared/infra/api/handlers"
 	"tech_challenge/internal/shared/infra/api/middlewares"
-	file_router "tech_challenge/internal/shared/infra/api/routes"
 	_ "tech_challenge/internal/shared/infra/api/swagger"
 	"tech_challenge/internal/shared/infra/database"
 )
@@ -38,17 +37,13 @@ func Init() {
 	ginRouter.Use(gin.Recovery())
 	ginRouter.Use(middlewares.ErrorHandlerMiddleware())
 
-	// ginRouter.GET("/health", healthHandler.Health)
-	// ginRouter.GET("/v1/health", healthHandler.Health)
-
 	healthHandler := handlers.NewHealthHandler()
 	ginRouter.GET("/health", healthHandler.Health)
+	ginRouter.GET("/v1/health", healthHandler.Health)
 
 	v1Routes := ginRouter.Group("/v1")
-	// healthHandler := handlers.NewHealthHandler()
-	// ginRouter.GET("/health", healthHandler.Health)
 
-	file_router.RegisterFileRoutes(v1Routes.Group("/uploads"))
+	// file_router.RegisterFileRoutes(v1Routes.Group("/uploads"))
 
 	product_router.RegisterProductRoutes(v1Routes.Group("/products"))
 	product_router.RegisterCategoryRoutes(v1Routes.Group("/categories"))

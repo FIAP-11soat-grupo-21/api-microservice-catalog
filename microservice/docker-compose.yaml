@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres
     env_file:
-      - .env
+      - .env.aws
     ports:
       - "5432:5432"
     volumes:
@@ -19,17 +19,17 @@ services:
       - postgres
       - minio
     env_file:
-      - .env
+      - .env.aws
     volumes:
       - .:/app
-      - ./uploads:/uploads
+      # - ./uploads:/uploads
     networks:
       - backbone
   minio:
     image: quay.io/minio/minio:latest
     container_name: minio
     env_file:
-      - .env
+      - .env.aws
     command: server /data --console-address ":9001"
     volumes:
       - minio:/data

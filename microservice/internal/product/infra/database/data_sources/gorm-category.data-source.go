@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"tech_challenge/internal/product/daos"
+	database_errors "tech_challenge/internal/product/infra/database/database_errors"
 	"tech_challenge/internal/product/infra/database/mappers"
 	"tech_challenge/internal/product/infra/database/models"
 	"tech_challenge/internal/shared/infra/database"
@@ -50,5 +51,9 @@ func (r *GormCategoryDataSource) Update(category daos.CategoryDAO) error {
 }
 
 func (r *GormCategoryDataSource) Delete(id string) error {
-	return r.db.Delete(&models.CategoryModel{}, "id = ?", id).Error
+	result := r.db.Delete(&models.CategoryModel{}, "id = ?", id)
+	if result.Error != nil {
+		return database_errors.HandleDatabaseErrors(result.Error)
+	}
+	return nil
 }

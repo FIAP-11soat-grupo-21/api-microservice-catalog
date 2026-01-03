@@ -115,18 +115,18 @@ erDiagram
 | Método | Rota                                         | Descrição                        |
 |--------|----------------------------------------------|----------------------------------|
 | POST   | /v1/products                                | Cadastrar novo produto           |
-| GET    | /v1/products                                | Listar todos os produtos         |
-| GET    | /v1/products?category_id={id}               | Listar produtos por categoria    |
+| GET    | /v1/products                                | Listar todos os produtos (retorna apenas imagem default) |
+| GET    | /v1/products?category_id={id}               | Listar produtos por categoria (retorna apenas imagem default) |
 | GET    | /v1/products/:id                            | Buscar produto por ID            |
 | PUT    | /v1/products/:id                            | Atualizar produto                |
 | DELETE | /v1/products/:id                            | Remover produto                  |
 | PATCH  | /v1/products/:id/images                     | Adicionar imagem ao produto      |
 | DELETE | /v1/products/:id/images/:image_file_name     | Remover imagem do produto        |
+| GET    | /v1/products/:id/images                     | Listar todas as imagens do produto |
 
 ### Outros
 | Método | Rota                 | Descrição                  |
 |--------|----------------------|----------------------------|
-| POST   | /v1/uploads          | Upload direto de arquivo   |
 | GET    | /health              | Health check               |
 | GET    | /v1/health           | Health check v1            |
 | GET    | /swagger/index.html  | Documentação Swagger       |
@@ -136,30 +136,30 @@ erDiagram
 ## Checklist de Testes das Rotas da API
 
 ## Categorias
-| Rota                                      | Método | Testado? | Observações                       |
+| Rota                                      | Método | Disponível para testes | Observações                       |
 |-------------------------------------------|--------|----------|-----------------------------------|
-| /v1/categories                           | POST   | [x]      | Cadastrar nova categoria          |
-| /v1/categories                           | GET    | [x]      | Listar todas as categorias        |
-| /v1/categories/:id                       | GET    | [x]      | Buscar categoria por ID           |
-| /v1/categories/:id                       | PUT    | [x]      | Atualizar categoria               |
-| /v1/categories/:id                       | DELETE | [x]      | Remover categoria                 |
+| /v1/categories                           | POST   | ✅      | Cadastrar nova categoria          |
+| /v1/categories                           | GET    | ✅      | Listar todas as categorias        |
+| /v1/categories/:id                       | GET    | ✅      | Buscar categoria por ID           |
+| /v1/categories/:id                       | PUT    | ✅      | Atualizar categoria               |
+| /v1/categories/:id                       | DELETE | ✅      | Remove categoria (apenas se não houver produtos relacionados; não tem cascade) |
 
 ## Produtos
 | Rota                                      | Método | Testado? | Observações                       |
 |-------------------------------------------|--------|----------|-----------------------------------|
-| /v1/products                             | POST   | [ ]      | Cadastrar novo produto            |
-| /v1/products                             | GET    | [ ]      | Listar todos os produtos          |
-| /v1/products?category_id={id}            | GET    | [ ]      | Listar produtos por categoria     |
-| /v1/products/:id                         | GET    | [ ]      | Buscar produto por ID             |
-| /v1/products/:id                         | PUT    | [ ]      | Atualizar produto                 |
-| /v1/products/:id                         | DELETE | [ ]      | Remover produto                   |
-| /v1/products/:id/images                  | PATCH  | [ ]      | Adicionar imagem ao produto       |
-| /v1/products/:id/images/:image_file_name | DELETE | [ ]      | Remover imagem do produto         |
+| /v1/products                             | POST   | ✅      | Cadastrar novo produto            |
+| /v1/products                             | GET    | ✅      | Listar todos os produtos (retorna apenas imagem default) |
+| /v1/products?category_id={id}            | GET    | ✅      | Listar produtos por categoria (retorna apenas imagem default) |
+| /v1/products/:id                         | GET    | ✅      | Buscar produto por ID (retorna apenas imagem default) |
+| /v1/products/:id                         | PUT    | ✅      | Atualizar produto                 |
+| /v1/products/:id                         | DELETE | ✅      | Remover produto (cascade: deleta imagens do banco e do bucket, exceto a default_product_image.webp) |
+| /v1/products/:id/images                  | PATCH  | ✅      | Adicionar imagem ao produto (nova imagem fica com a flag is_default como True e todas as anteriores são setadas como false) |
+| /v1/products/:id/images/:image_file_name | DELETE | ✅      | Remove imagem do produto: se não for default, remove do banco e do bucket (exceto default_product_image.webp); se for default e houver outras, a mais recente vira default; se for a única imagem, deleção é barrada. |
+| /v1/products/:id/images                  | GET    | [ ]      | Listar todas as imagens do produto |
 
 ## Outros
 | Rota                                      | Método | Testado? | Observações                       |
 |-------------------------------------------|--------|----------|-----------------------------------|
-| /v1/uploads                              | POST   | [ ]      | Testar upload direto              |
 | /health                                  | GET    | [ ]      |                                   |
 | /v1/health                               | GET    | [ ]      |                                   |
 | /swagger/index.html                      | GET    | [ ]      | Verificar documentação            |
@@ -183,6 +183,44 @@ erDiagram
    ```
 2. Exporte as variáveis de ambiente conforme o exemplo do `.env`.
 3. Execute o microsserviço normalmente.
+
+---
+
+## Como configurar variáveis de ambiente para MinIO (local) ou AWS S3
+
+O projeto já possui dois arquivos de exemplo para configuração das variáveis de ambiente:
+- `.env.local.example`: para rodar localmente com MinIO simulando o S3
+- `.env.aws.example`: para rodar apontando diretamente para a AWS S3
+
+**Como usar:**
+1. Escolha o arquivo de exemplo conforme o ambiente desejado.
+2. Copie e renomeie para `.env.local` ou `.env.aws` (por exemplo: `cp .env.local.example .env.local` ou `cp .env.aws.example .env.aws`).
+3. No arquivo `docker-compose.yaml`, altere o campo `env_file` do serviço `api` para referenciar o arquivo desejado:
+   ```yaml
+   env_file:
+     - .env.local   # para MinIO
+     # ou
+     - .env.aws     # para AWS S3
+   ```
+4. Ajuste os valores das variáveis conforme necessário (bucket, credenciais, endpoint, etc).
+
+**Resumo das principais variáveis:**
+- Para MinIO local:
+  - `API_UPLOAD_URL=http://minio:9000`
+  - `AWS_S3_ENDPOINT=http://minio:9000`
+- Para AWS S3:
+  - `API_UPLOAD_URL=https://<nome-do-bucket>.s3.<região>.amazonaws.com`
+  - `AWS_S3_ENDPOINT=` (deixe vazio)
+
+**Sobre as credenciais:**
+- **MinIO local:**
+  - As variáveis `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` devem ser preenchidas com o usuário e senha do MinIO (geralmente definidos como `MINIO_ROOT_USER` e `MINIO_ROOT_PASSWORD` no seu .env).
+- **AWS S3:**
+  - As variáveis `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` devem ser preenchidas com as credenciais de um usuário IAM da AWS que tenha permissão de acesso ao bucket S3 utilizado.
+
+Assim, basta ajustar as credenciais conforme o ambiente desejado para garantir o funcionamento correto do upload e acesso às imagens.
+
+Assim, basta trocar o arquivo de variáveis e o serviço irá apontar para o ambiente desejado.
 
 ---
 

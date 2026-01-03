@@ -70,7 +70,8 @@ func NewImage(originalFileName string) (Image, error) {
 func NewImageDefault() (Image, error) {
 	config := env.GetConfig()
 	imageHost := config.APIUploadUrl
-	imageUrl := fmt.Sprintf("%s/%s", imageHost, DEFAULT_IMAGE_FILE_NAME)
+	bucket := config.AWS.S3.BucketName
+	imageUrl := fmt.Sprintf("%s/%s/%s", imageHost, bucket, DEFAULT_IMAGE_FILE_NAME)
 	id := uuid.NewString()
 	fmt.Printf("[NewImageDefault] Gerando imagem default: ID=%s, FileName=%s, Url=%s\n", id, DEFAULT_IMAGE_FILE_NAME, imageUrl)
 	return Image{

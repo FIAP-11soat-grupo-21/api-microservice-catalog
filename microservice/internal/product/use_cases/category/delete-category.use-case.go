@@ -25,7 +25,7 @@ func (uc *DeleteCategoryUseCase) Execute(id string) error {
 	err = uc.gateway.Delete(category.ID)
 
 	if err != nil {
-		return &exceptions.InvalidCategoryDataException{}
+		return err
 	}
 
 	return nil

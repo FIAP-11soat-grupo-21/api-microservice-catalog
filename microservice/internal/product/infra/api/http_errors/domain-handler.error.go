@@ -38,6 +38,9 @@ func HandleDomainErrors(err error, ctx *gin.Context) bool {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": e.Error()})
 		return true
 
+	case *exceptions.CategoryHasProductsException:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": e.Error()})
+		return true
 	}
 
 	return false

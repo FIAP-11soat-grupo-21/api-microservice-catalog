@@ -13,7 +13,7 @@ type ProductModel struct {
 	Price       float64             `gorm:"not null; decimal(10,4);"`
 	Active      bool                `gorm:"not null;"`
 	CreatedAt   time.Time           `gorm:"autoCreateTime"`
-	Images      []ProductImageModel `gorm:"foreignKey:ProductID"`
+	Images      []ProductImageModel `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 }
 
 func (ProductModel) TableName() string {

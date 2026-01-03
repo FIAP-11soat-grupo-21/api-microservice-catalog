@@ -2,6 +2,7 @@ package entities
 
 import (
 	// "fmt"
+
 	"slices"
 	"tech_challenge/internal/product/domain/exceptions"
 	value_objects "tech_challenge/internal/product/domain/value-objects"
@@ -171,7 +172,7 @@ func (c *Product) IsEmpty() bool {
 	return c.ID == ""
 }
 
-func (p *Product) SetPreviousImagesAsNotDefault() {
+func (p *Product) SetAllPreviousImagesAsNotDefault() {
 	for i := 0; i < len(p.Images)-1; i++ {
 		p.Images[i].IsDefault = false
 	}

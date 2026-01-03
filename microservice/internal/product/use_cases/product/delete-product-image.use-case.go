@@ -1,8 +1,10 @@
 package use_cases
 
 import (
+	"fmt"
 	"tech_challenge/internal/product/application/gateways"
 	"tech_challenge/internal/product/domain/exceptions"
+	value_objects "tech_challenge/internal/product/domain/value-objects"
 )
 
 type DeleteProductImageUseCase struct {
@@ -16,35 +18,39 @@ func NewDeleteProductImageUseCase(gateway gateways.ProductGateway) *DeleteProduc
 }
 
 func (uc *DeleteProductImageUseCase) Execute(productID string, imageFileName string) error {
-	product, err := uc.gateway.FindByID(productID)
-
+	_, err := uc.gateway.FindByID(productID)
 	if err != nil {
 		return &exceptions.ProductNotFoundException{}
 	}
-
-	imageToBeDeletedIsTheDefault := product.ImageIsDefault(imageFileName)
-
-	err = product.RemoveImage(imageFileName)
-
-	if err != nil {
-		return err
+	productImages, err := uc.gateway.FindAllImagesProductById(productID)
+	if err != nil || len(productImages.Images) == 0 {
+		return &exceptions.ProductImagesNotFoundException{}
 	}
 
-	err = uc.gateway.Update(product)
-
-	if err != nil {
-		return &exceptions.InvalidProductDataException{}
+	if len(productImages.Images) == 1 {
+		return &exceptions.ProductImageCannotBeEmptyException{}
 	}
 
-	if !imageToBeDeletedIsTheDefault {
-		err = uc.gateway.DeleteImage(imageFileName)
+	isDefault := productImages.ImageIsDefault(imageFileName)
 
+	if isDefault {
+		err = uc.gateway.SetLastImageAsDefault(productID, imageFileName)
 		if err != nil {
-			return &exceptions.InvalidProductImageException{
-				Message: "Failed to delete image file from storage",
-			}
+			return err
 		}
 	}
 
+	err = uc.gateway.DeleteProductImage(imageFileName)
+	if err != nil {
+		return &exceptions.InvalidProductImageException{Message: "Failed to delete image from database"}
+	}
+
+	if imageFileName != value_objects.DEFAULT_IMAGE_FILE_NAME {
+		err = uc.gateway.DeleteImage(imageFileName)
+		if err != nil {
+
+			return fmt.Errorf("failed to delete file from bucket: %w", err)
+		}
+	}
 	return nil
 }

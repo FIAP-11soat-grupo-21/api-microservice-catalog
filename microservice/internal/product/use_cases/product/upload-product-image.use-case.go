@@ -18,7 +18,6 @@ func NewUploadProductImageUseCase(gateway gateways.ProductGateway) *UploadProduc
 }
 
 func (uc *UploadProductImageUseCase) Execute(productDTO dtos.UploadProductImageDTO) error {
-	fmt.Println("[UploadProductImageUseCase] Recebido DTO:", productDTO)
 	product, err := uc.gateway.FindByID(productDTO.ProductID)
 	if err != nil {
 		fmt.Printf("[UploadProductImageUseCase] Produto não encontrado: %v\n", err)
@@ -35,10 +34,7 @@ func (uc *UploadProductImageUseCase) Execute(productDTO dtos.UploadProductImageD
 	url, err := uc.gateway.UploadImage(*newFileName, productDTO.FileContent)
 	if err != nil {
 		fmt.Printf("[UploadProductImageUseCase] Erro ao fazer upload: %v\n", err)
-		if _, ok := err.(*exceptions.BucketNotFoundException); ok {
-			return err
-		}
-		return &exceptions.InvalidProductImageException{}
+		return err // Propaga o erro real para o handler
 	}
 
 	if err := uc.gateway.AddAndSetDefaultImage(product, url); err != nil {

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"tech_challenge/internal/product/application/controllers"
 	"tech_challenge/internal/product/application/dtos"
-	"tech_challenge/internal/product/domain/exceptions"
 	"tech_challenge/internal/product/infra/api/schemas"
 	"tech_challenge/internal/product/infra/database/data_sources"
 	shared_factories "tech_challenge/internal/shared/factories"
@@ -21,9 +20,10 @@ type ProductHandler struct {
 
 func NewProductHandler() *ProductHandler {
 	productDataSource := data_sources.NewProductDataSource()
+	categoryDataSource := data_sources.NewGormCategoryDataSource()
 	fileProvider := shared_factories.NewFileProvider()
 
-	productController := controllers.NewProductController(productDataSource, fileProvider)
+	productController := controllers.NewProductController(productDataSource, categoryDataSource, fileProvider)
 
 	return &ProductHandler{
 		productController: *productController,
@@ -48,17 +48,10 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	}
 
 	productCreated, err := h.productController.Create(productRequestBody.ToDTO())
-
 	if err != nil {
-		// Trata erro de chave estrangeira do Postgres
-		if strings.Contains(err.Error(), "SQLSTATE 23503") {
-			ctx.JSON(400, gin.H{"error": "Categoria não encontrada para o produto"})
-			return
-		}
-		ctx.JSON(500, gin.H{"error": "Internal server error"})
+		_ = ctx.Error(err)
 		return
 	}
-
 	ctx.JSON(http.StatusCreated, schemas.ToProductResponseSchema(productCreated))
 }
 
@@ -203,10 +196,12 @@ func (h *ProductHandler) UploadProductImage(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		if _, ok := err.(*exceptions.BucketNotFoundException); ok {
-			ctx.JSON(500, gin.H{"error": err.Error()})
+		// Retorna erro 404 se for bucket inexistente ou inválido
+		if strings.Contains(err.Error(), "NoSuchBucket") || strings.Contains(err.Error(), "InvalidBucketName") {
+			ctx.JSON(404, gin.H{"error": err.Error()})
 			return
 		}
+		// Sempre retorna a mensagem real do erro
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
@@ -232,7 +227,13 @@ func (h *ProductHandler) DeleteProductImage(ctx *gin.Context) {
 	err := h.productController.DeleteImage(productId, imageFileName)
 
 	if err != nil {
-		_ = ctx.Error(err)
+		// Se for erro de imagem não pode ser removida por ser a última, retorna 409 (conflito)
+		if strings.Contains(err.Error(), "cannot be empty") || strings.Contains(err.Error(), "só possui uma imagem") {
+			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+		// Retorna a mensagem de erro específica para o client
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -258,4 +259,22 @@ func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+}
+
+// @Summary List all images of a product
+// @Tags Products
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200 {array} schemas.ProductImageResponseSchema
+// @Failure 404 {object} schemas.ErrorMessageSchema
+// @Router /products/{id}/images [get]
+func (h *ProductHandler) FindAllImagesProductById(ctx *gin.Context) {
+	productId := ctx.Param("id")
+	images, err := h.productController.FindAllImagesProductById(productId)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	// Retorna apenas o array de imagens
+	ctx.JSON(http.StatusOK, images)
 }

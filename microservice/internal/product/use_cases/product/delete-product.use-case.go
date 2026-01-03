@@ -15,17 +15,23 @@ func NewDeleteProductUseCase(gateway gateways.ProductGateway) *DeleteProductUseC
 	}
 }
 
-func (uc *DeleteProductUseCase) Execute(id string) error {
-	product, err := uc.gateway.FindByID(id)
-
+func (uc *DeleteProductUseCase) Execute(productID string) error {
+	_, err := uc.gateway.FindByID(productID)
 	if err != nil {
 		return &exceptions.ProductNotFoundException{}
 	}
 
-	err = uc.gateway.Delete(product.ID)
-
+	product_images, err := uc.gateway.FindAllImagesProductById(productID)
 	if err != nil {
-		return &exceptions.InvalidProductDataException{}
+		return &exceptions.ProductImagesNotFoundException{}
+	}
+	err = uc.gateway.DeleteFiles(product_images.Images)
+	if err != nil {
+		return &exceptions.DeleteImagesStorageException{}
+	}
+	err = uc.gateway.Delete(productID)
+	if err != nil {
+		return err
 	}
 
 	return nil

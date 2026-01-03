@@ -10,7 +10,7 @@ container_environment_variables = {
   API_PORT : "8080"
   API_HOST : "0.0.0.0"
   AWS_REGION : "us-east-2"
-  API_UPLOAD_URL : "http://localhost:8080/uploads"
+  API_UPLOAD_URL : "http://minio:9000"
   DB_RUN_MIGRATIONS : "true"
   DB_NAME : "postgres"
   DB_PORT : "5432"
@@ -78,6 +78,10 @@ api_endpoints = {
   },
   delete_product_image = {
     route_key  = "DELETE /products/{id}/images/{image_file_name}"
+    restricted = false
+  },
+  get_product_images = {
+    route_key  = "GET /products/{id}/images"
     restricted = false
   },
   health = {

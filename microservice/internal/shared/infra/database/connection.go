@@ -99,8 +99,8 @@ func Close() {
 
 func RunMigrations() {
 	if err := dbConnection.AutoMigrate(
-		&product_models.ProductModel{},
 		&product_models.CategoryModel{},
+		&product_models.ProductModel{},
 		&product_models.ProductImageModel{},
 	); err != nil {
 		log.Printf("Erro ao executar AutoMigrate: %v", err)
