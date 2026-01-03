@@ -62,16 +62,6 @@ variable "alb_is_internal" {
 ################# Variáveis do DynamoDB #################
 #########################################################
 
-variable "dynamodb_secondary_indexes" {
-  description = "Lista de índices secundários para a tabela DynamoDB"
-  type = list(object({
-    name            = string
-    hash_key        = string
-    range_key       = string
-    projection_type = string
-  }))
-}
-
 variable "dynamodb_hash_key" {
   description = "Hash key da tabela DynamoDB"
   type        = string
