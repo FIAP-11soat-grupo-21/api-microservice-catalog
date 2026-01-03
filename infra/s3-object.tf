@@ -1,5 +1,5 @@
 resource "aws_s3_object" "default_product_image" {
-  bucket = aws_s3_bucket.this.id
+  bucket = module.s3_bucket.bucket_name
 
   key    = "default_product_image.webp"
   source = "../microservice/uploads/default_product_image.webp"
@@ -9,6 +9,6 @@ resource "aws_s3_object" "default_product_image" {
   etag = filemd5("../microservice/uploads/default_product_image.webp")
 
   depends_on = [
-    aws_s3_bucket.this
+    module.s3_bucket
   ]
 }
