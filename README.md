@@ -1,13 +1,35 @@
 # API Microservice Catalog
 
+Este microsserviço tem como objetivo central o cadastro e a gestão de produtos e categorias, permitindo operações completas de criação, atualização, consulta e remoção, além do gerenciamento de imagens de produtos. Ele foi projetado para garantir integridade relacional, escalabilidade e facilidade de integração com outros sistemas do ecossistema.
+
+## Pré-requisitos
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Go](https://golang.org/) (para desenvolvimento local)
+- [Terraform](https://www.terraform.io/) (para provisionamento de infraestrutura)
+- [AWS CLI](https://aws.amazon.com/cli/) (para integração com AWS)
+
 ## Estrutura do Projeto
 
 Este repositório contém dois principais diretórios:
 
-- **infra/**: scripts e módulos de infraestrutura como código (IaC) para provisionamento de recursos na AWS, incluindo banco de dados, rede, ECS, ALB, entre outros.
+- **infra/**: scripts e módulos de infraestrutura como código (IaC) para provisionamento de recursos na AWS, incluindo banco de dados, rede, ECS, bucket S3, entre outros.
 - **microservice/**: código-fonte do microsserviço de catálogo, responsável pelo gerenciamento de produtos e categorias.
 
 ---
+
+## Estrutura de Pastas
+- `microservice/` - Código-fonte do microsserviço (API, domínio, infraestrutura, etc)
+- `infra/` - Scripts e módulos Terraform para provisionamento de recursos na AWS
+- `uploads/` - Imagens default e arquivos de upload
+
+## Variáveis de Ambiente
+Principais variáveis utilizadas (veja exemplos completos em `.env.local.example` e `.env.aws.example`):
+- `API_UPLOAD_URL` - URL base para uploads de imagens (MinIO ou AWS S3)
+- `AWS_S3_BUCKET_NAME` - Nome do bucket S3
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` - Credenciais AWS ou MinIO
+- `AWS_REGION` - Região AWS
+- `DB_HOST`, `DB_NAME`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` - Configurações do banco de dados
 
 ## infra/
 
@@ -102,76 +124,28 @@ erDiagram
 
 ## Rotas Disponíveis
 
-### Categorias
-| Método | Rota                        | Descrição                    |
-|--------|-----------------------------|------------------------------|
-| POST   | /v1/categories              | Cadastrar nova categoria     |
-| GET    | /v1/categories              | Listar todas as categorias   |
-| GET    | /v1/categories/:id          | Buscar categoria por ID      |
-| PUT    | /v1/categories/:id          | Atualizar categoria          |
-| DELETE | /v1/categories/:id          | Remover categoria            |
-
-### Produtos
-| Método | Rota                                         | Descrição                        |
-|--------|----------------------------------------------|----------------------------------|
-| POST   | /v1/products                                | Cadastrar novo produto           |
-| GET    | /v1/products                                | Listar todos os produtos (retorna apenas imagem default) |
-| GET    | /v1/products?category_id={id}               | Listar produtos por categoria (retorna apenas imagem default) |
-| GET    | /v1/products/:id                            | Buscar produto por ID            |
-| PUT    | /v1/products/:id                            | Atualizar produto                |
-| DELETE | /v1/products/:id                            | Remover produto                  |
-| PATCH  | /v1/products/:id/images                     | Adicionar imagem ao produto      |
-| DELETE | /v1/products/:id/images/:image_file_name     | Remover imagem do produto        |
-| GET    | /v1/products/:id/images                     | Listar todas as imagens do produto |
-
-### Outros
-| Método | Rota                 | Descrição                  |
-|--------|----------------------|----------------------------|
-| GET    | /health              | Health check               |
-| GET    | /v1/health           | Health check v1            |
-| GET    | /swagger/index.html  | Documentação Swagger       |
-
----
-
-## Checklist de Testes das Rotas da API
 
 ## Categorias
-| Rota                                      | Método | Disponível para testes | Observações                       |
-|-------------------------------------------|--------|----------|-----------------------------------|
-| /v1/categories                           | POST   | ✅      | Cadastrar nova categoria          |
-| /v1/categories                           | GET    | ✅      | Listar todas as categorias        |
-| /v1/categories/:id                       | GET    | ✅      | Buscar categoria por ID           |
-| /v1/categories/:id                       | PUT    | ✅      | Atualizar categoria               |
-| /v1/categories/:id                       | DELETE | ✅      | Remove categoria (apenas se não houver produtos relacionados; não tem cascade) |
+| Rota                                      | Método | Observações                       |
+|-------------------------------------------|--------|-----------------------------------|
+| /v1/categories                           | POST   | Cadastrar nova categoria          |
+| /v1/categories                           | GET    | Listar todas as categorias        |
+| /v1/categories/:id                       | GET    | Buscar categoria por ID           |
+| /v1/categories/:id                       | PUT    | Atualizar categoria               |
+| /v1/categories/:id                       | DELETE | Remove categoria (apenas se não houver produtos relacionados; não tem cascade) |
 
 ## Produtos
-| Rota                                      | Método | Testado? | Observações                       |
-|-------------------------------------------|--------|----------|-----------------------------------|
-| /v1/products                             | POST   | ✅      | Cadastrar novo produto            |
-| /v1/products                             | GET    | ✅      | Listar todos os produtos (retorna apenas imagem default) |
-| /v1/products?category_id={id}            | GET    | ✅      | Listar produtos por categoria (retorna apenas imagem default) |
-| /v1/products/:id                         | GET    | ✅      | Buscar produto por ID (retorna apenas imagem default) |
-| /v1/products/:id                         | PUT    | ✅      | Atualizar produto                 |
-| /v1/products/:id                         | DELETE | ✅      | Remover produto (cascade: deleta imagens do banco e do bucket, exceto a default_product_image.webp) |
-| /v1/products/:id/images                  | PATCH  | ✅      | Adicionar imagem ao produto (nova imagem fica com a flag is_default como True e todas as anteriores são setadas como false) |
-| /v1/products/:id/images/:image_file_name | DELETE | ✅      | Remove imagem do produto: se não for default, remove do banco e do bucket (exceto default_product_image.webp); se for default e houver outras, a mais recente vira default; se for a única imagem, deleção é barrada. |
-| /v1/products/:id/images                  | GET    | [ ]      | Listar todas as imagens do produto |
-
-## Outros
-| Rota                                      | Método | Testado? | Observações                       |
-|-------------------------------------------|--------|----------|-----------------------------------|
-| /health                                  | GET    | [ ]      |                                   |
-| /v1/health                               | GET    | [ ]      |                                   |
-| /swagger/index.html                      | GET    | [ ]      | Verificar documentação            |
-
----
-
-**Observações Gerais:**
-- Teste com dados válidos e inválidos.
-- Verifique respostas de erro (400, 404, 500).
-- Teste upload e remoção de imagens.
-- Teste filtro por categoria.
-- Anote problemas, melhorias ou comportamentos inesperados.
+| Rota                                      | Método | Observações                       |
+|-------------------------------------------|--------|-----------------------------------|
+| /v1/products                             | POST   | Cadastrar novo produto            |
+| /v1/products                             | GET    | Listar todos os produtos (Para cada produto, é retornada apenas a imagem marcada como default.) |
+| /v1/products?category_id={id}            | GET    | Listar produtos por categoria (Para cada produto, é retornada apenas a imagem marcada como default.) |
+| /v1/products/:id                         | GET    | Buscar produto por ID (Para cada produto, é retornada apenas a imagem marcada como default.) |
+| /v1/products/:id                         | PUT    | Atualizar produto                 |
+| /v1/products/:id                         | DELETE | Remover produto (cascade: deleta imagens do banco e do bucket, exceto a default_product_image.webp) |
+| /v1/products/:id/images                  | PATCH  | Adicionar imagem ao produto (nova imagem fica com a flag is_default como True e todas as anteriores são setadas como false) |
+| /v1/products/:id/images/:image_file_name | DELETE | Remove imagem do produto: se não for default, remove do banco e do bucket (exceto default_product_image.webp); se for default e houver outras, a mais recente vira default; se for a única imagem, deleção é barrada. |
+| /v1/products/:id/images                  | GET    | Listar todas as imagens do produto |
 
 ---
 
@@ -218,27 +192,48 @@ O projeto já possui dois arquivos de exemplo para configuração das variáveis
 - **AWS S3:**
   - As variáveis `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` devem ser preenchidas com as credenciais de um usuário IAM da AWS que tenha permissão de acesso ao bucket S3 utilizado.
 
-Assim, basta ajustar as credenciais conforme o ambiente desejado para garantir o funcionamento correto do upload e acesso às imagens.
-
 Assim, basta trocar o arquivo de variáveis e o serviço irá apontar para o ambiente desejado.
 
 ---
 
-## Imagem Default para Produtos (Minio)
+## Imagem Default para Produtos (Minio e AWS)
 
-Se estiver rodando localmente com Minio, é necessário subir manualmente a imagem default do produto para o bucket. Essa imagem é usada quando um produto não possui imagem cadastrada.
+Se estiver rodando localmente com Minio, é necessário criar manualmente o bucket e subir a imagem default do produto. Essa imagem é usada sempre que um produto não possui imagem cadastrada.
 
 1. Certifique-se de que o serviço Minio está rodando.
 2. Acesse o painel do Minio (geralmente em http://localhost:9000) ou utilize o client Minio.
-3. Utilize o usuário e senha definido no seu arquivo .env nas variáveis MINIO_ROOT_USER e MINIO_ROOT_PASSWORD para acessar o Minio
-2. Crie o bucket com o nome definido no seu arquivo .env na variável **AWS_S3_BUCKET_NAME**
-
-3. Faça upload do arquivo que está na pasta `uploads/default_product_image.webp` para o bucket que foi criado anteriormente.
+3. Utilize o usuário e senha definidos no seu arquivo .env nas variáveis MINIO_ROOT_USER e MINIO_ROOT_PASSWORD para acessar o Minio.
+4. Crie o bucket com o nome definido no seu arquivo .env na variável **AWS_S3_BUCKET_NAME** (caso ainda não exista).
+5. Faça upload do arquivo que está na pasta `uploads/default_product_image.webp` para o bucket criado anteriormente.
 
 Assim, sempre que um produto não tiver imagem, o sistema irá retornar a imagem default.
 
+**Importante:**
+- Quando o deploy é realizado via esteira (CI/CD), o bucket `${AWS_S3_BUCKET_NAME}` é provisionado automaticamente e a imagem default (`default_product_image.webp`) já é inserida no bucket durante o provisionamento. Ou seja, **não é necessário realizar nenhum procedimento manual** para garantir a presença da imagem default no bucket em ambientes provisionados pela esteira.
+- Esse processo garante que tanto em ambiente local (Minio) quanto em produção (AWS S3), a imagem default estará sempre disponível para os produtos que não possuem imagem cadastrada.
+
 ---
 
-## Observações
-- Para produção, garanta que as variáveis de ambiente estejam corretas e nunca sobrescreva o host do banco para `localhost` no código.
-- O seed de dados deve ser executado apenas em ambiente controlado, pois insere dados iniciais no banco.
+## Como rodar os testes
+Se existirem testes automatizados, rode:
+```sh
+go test ./...
+```
+Ou utilize o comando específico do seu framework de testes.
+
+## Exemplos de uso das rotas
+Exemplo para criar uma categoria:
+```sh
+curl -X POST http://localhost:8080/v1/categories \
+  -H 'Content-Type: application/json' \
+  -d '{"name": "Bebidas", "active": true}'
+```
+Exemplo para criar um produto:
+```sh
+curl -X POST http://localhost:8080/v1/products \
+  -H 'Content-Type: application/json' \
+  -d '{"name": "Coca-Cola", "category_id": "<id>", "price": 5.99, "active": true}'
+```
+
+## Deploy na AWS
+#TODO
