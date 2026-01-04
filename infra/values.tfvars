@@ -1,6 +1,6 @@
 application_name = "catalog-api"
 image_name       = "GHCR_IMAGE_TAG"
-image_port       = 8080
+image_port       = 8084
 app_path_pattern = ["/products*", "/products/*", "/categories*", "/categories/*"]
 
 # =======================================================
@@ -8,7 +8,7 @@ app_path_pattern = ["/products*", "/products/*", "/categories*", "/categories/*"
 # =======================================================
 container_environment_variables = {
   GO_ENV : "production"
-  API_PORT : "8080"
+  API_PORT : "8084"
   API_HOST : "0.0.0.0"
   AWS_REGION : "us-east-2"
 

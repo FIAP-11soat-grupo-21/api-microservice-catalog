@@ -34,19 +34,20 @@ func NewS3FileProvider() *S3FileProvider {
 		client = s3.NewFromConfig(awsCfg)
 	} else {
 		// Endpoint preenchido: usar MinIO/local
-		customResolver := aws.EndpointResolverWithOptionsFunc(
-			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		//nolint:staticcheck
+		customResolver := aws.EndpointResolverWithOptionsFunc( //nolint:staticcheck
+			func(service, region string, options ...interface{}) (aws.Endpoint, error) { //nolint:staticcheck
 				if service == s3.ServiceID {
-					return aws.Endpoint{
+					return aws.Endpoint{ //nolint:staticcheck
 						URL:               cfgEnv.AWS.S3.Endpoint,
 						SigningRegion:     cfgEnv.AWS.Region,
 						HostnameImmutable: true,
 					}, nil
 				}
-				return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+				return aws.Endpoint{}, &aws.EndpointNotFoundError{} //nolint:staticcheck
 			},
 		)
-		awsCfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(cfgEnv.AWS.Region), config.WithEndpointResolverWithOptions(customResolver))
+		awsCfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(cfgEnv.AWS.Region), config.WithEndpointResolverWithOptions(customResolver)) //nolint:staticcheck
 		if err != nil {
 			panic(err)
 		}
