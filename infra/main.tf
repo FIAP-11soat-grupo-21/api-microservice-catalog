@@ -99,7 +99,7 @@ module "GetCatalogAPIRoute" {
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     delete_product_image = {
-      route_key           = "DELETE /products/{id}/images"
+      route_key           = "DELETE /products/{id}/images/{image_file_name}"
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
