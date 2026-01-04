@@ -214,12 +214,6 @@ Assim, sempre que um produto não tiver imagem, o sistema irá retornar a imagem
 
 ---
 
-## Como rodar os testes
-Se existirem testes automatizados, rode:
-```sh
-go test ./...
-```
-Ou utilize o comando específico do seu framework de testes.
 
 ## Exemplos de uso das rotas
 Exemplo para criar uma categoria:
@@ -237,3 +231,22 @@ curl -X POST http://localhost:8080/v1/products \
 
 ## Deploy na AWS
 #TODO
+
+## Como rodar testes unitários localmente e visualizar cobertura de código
+
+Para rodar os testes unitários do microsserviço e visualizar a cobertura de código:
+
+1. Certifique-se de estar na raiz do módulo Go (onde está o arquivo `go.mod`).
+2. Execute os testes e gere o relatório de cobertura:
+   ```sh
+   go test -coverprofile=coverage.out ./...
+   ```
+3. Para visualizar a cobertura de código em formato HTML (colorido):
+   ```sh
+   go tool cover -html=coverage.out
+   ```
+   Isso abrirá uma página no navegador mostrando, linha a linha, o que está coberto por testes (verde = coberto, vermelho = não coberto).
+
+> **Dica:**
+> - Se aparecer erro de dependências, rode `go mod tidy` antes de rodar os testes.
+> - Para aumentar a cobertura, crie arquivos `*_test.go` nos pacotes desejados.
