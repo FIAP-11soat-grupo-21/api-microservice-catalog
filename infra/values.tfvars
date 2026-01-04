@@ -24,7 +24,7 @@ container_environment_variables = {
   # Exemplo de valor: https://product-photo-fiap-tech-challenge-catalog.s3.us-east-2.amazonaws.com
 }
 container_secrets = {}
-health_check_path = "/health"
+# health_check_path = "/health"
 task_role_policy_arns = [
   "arn:aws:iam::aws:policy/AmazonS3FullAccess",
   "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
