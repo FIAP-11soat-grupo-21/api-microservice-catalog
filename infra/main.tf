@@ -108,15 +108,15 @@ module "GetCatalogAPIRoute" {
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
-    health = {
-      route_key           = "GET /health"
-      restricted          = false
-      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-    },
-    v1_health = {
-      route_key           = "GET /v1/health"
-      restricted          = false
-      auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-    },
+    # health = {
+    #   route_key           = "GET /health"
+    #   restricted          = false
+    #   auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    # },
+    # v1_health = {
+    #   route_key           = "GET /v1/health"
+    #   restricted          = false
+    #   auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+    # },
   }
 }
