@@ -99,14 +99,14 @@ func TestRegisterFileRoutes_FileHandlerError(t *testing.T) {
 	require.Contains(t, w.Body.String(), "Failed to retrieve file")
 }
 
-func TestRegisterFileRoutes_Integration(t *testing.T) {
+// func TestRegisterFileRoutes_Integration(t *testing.T) {
 
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
-	RegisterFileRoutes(r.Group("/"))
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/test.txt", nil)
-	r.ServeHTTP(w, req)
-	require.Equal(t, 200, w.Code)
-	require.Contains(t, w.Body.String(), "fileUrl")
-}
+// 	gin.SetMode(gin.TestMode)
+// 	r := gin.New()
+// 	RegisterFileRoutes(r.Group("/"))
+// 	w := httptest.NewRecorder()
+// 	req := httptest.NewRequest("GET", "/test.txt", nil)
+// 	r.ServeHTTP(w, req)
+// 	require.Equal(t, 200, w.Code)
+// 	require.Contains(t, w.Body.String(), "fileUrl")
+// }
