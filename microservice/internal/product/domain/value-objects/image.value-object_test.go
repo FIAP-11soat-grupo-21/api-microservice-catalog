@@ -60,3 +60,14 @@ func TestNewImageWithFileNameAndUrl_Valid(t *testing.T) {
 	require.Equal(t, "http://host/file.jpg", img.Url)
 	require.False(t, img.IsDefault)
 }
+
+func TestImage_Value(t *testing.T) {
+	img := Image{
+		FileName:  "file.jpg",
+		Url:       "http://host/file.jpg",
+		IsDefault: false,
+	}
+	val := img.Value()
+	require.Equal(t, img.FileName, val.FileName)
+	require.Equal(t, img.Url, val.Url)
+}

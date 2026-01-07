@@ -98,3 +98,7 @@ func (c *Config) IsProduction() bool {
 func (c *Config) IsDevelopment() bool {
 	return c.GoEnv == "development"
 }
+func ResetConfig() {
+	instance = nil
+	once = sync.Once{}
+}

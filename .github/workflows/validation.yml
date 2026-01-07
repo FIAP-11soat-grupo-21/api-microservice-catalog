@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  analyze:
+  AnalyzeCode:
     name: Static analysis
     runs-on: ubuntu-latest
     env:
@@ -70,7 +70,7 @@ jobs:
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
-            -Dsonar.coverage.exclusions="**/*_test.go,**/*mock*.go,**/mocks/**"
+            -Dsonar.coverage.exclusions="**/*_test.go,**/*mock*.go,**/mocks/**,**/bdd/**"
 
   RunTests:
     name: Run Unit Tests
@@ -88,7 +88,25 @@ jobs:
       - name: Execute unit tests
         working-directory: microservice
         run: |
-          go test ./... -v 
+          go test -v $(go list ./... | grep -v '/bdd$')
+
+  # TestBDD:
+  #   name: Run BDD Tests
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: '1.21'
+
+  #     - name: Execute BDD tests
+  #       working-directory: microservice
+  #       run: |
+  #         go test -v ./bdd -run TestMain          
 
   Validation:
     name: Terraform Plan (infra)

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"tech_challenge/internal/product/application/dtos"
 	"tech_challenge/internal/product/application/gateways"
 	"tech_challenge/internal/product/application/presenters"
@@ -76,15 +75,14 @@ func (c *ProductController) Update(productDTO dtos.UpdateProductDTO) (dtos.Produ
 }
 
 func (c *ProductController) UploadImage(uploadDTO dtos.UploadProductImageDTO) error {
-	fmt.Println("[UploadImage] Iniciando upload para produto:", uploadDTO.ProductID, "Arquivo:", uploadDTO.FileName)
 	uploadProductImageUseCase := use_cases.NewUploadProductImageUseCase(c.productGateway)
-	err := uploadProductImageUseCase.Execute(uploadDTO)
-	if err != nil {
-		fmt.Printf("[UploadImage] Erro ao executar use case: %v (tipo: %T)\n", err, err)
-	} else {
-		fmt.Println("[UploadImage] Upload realizado com sucesso!")
-	}
-	return err
+	return uploadProductImageUseCase.Execute(uploadDTO)
+	// if err != nil {
+	// 	fmt.Printf("[UploadImage] Erro ao executar use case: %v (tipo: %T)\n", err, err)
+	// } else {
+	// 	fmt.Println("[UploadImage] Upload realizado com sucesso!")
+	// }
+	// return err
 }
 
 func (c *ProductController) DeleteImage(productID string, imageFileName string) error {

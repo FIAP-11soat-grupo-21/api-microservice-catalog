@@ -15,8 +15,17 @@ import (
 	"tech_challenge/internal/shared/config/env"
 )
 
+// 1. Defina a interface para o client S3
+
+type S3Client interface {
+	PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error)
+	DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
+}
+
+// 2. Altere o S3FileProvider para usar a interface
+
 type S3FileProvider struct {
-	client     *s3.Client
+	client     S3Client
 	bucketName string
 }
 
@@ -54,6 +63,7 @@ func NewS3FileProvider() *S3FileProvider {
 		client = s3.NewFromConfig(awsCfg)
 	}
 
+	// 3. No NewS3FileProvider, converta o client para S3Client
 	return &S3FileProvider{
 		client:     client,
 		bucketName: cfgEnv.AWS.S3.BucketName,
@@ -96,7 +106,12 @@ func (s *S3FileProvider) DeleteFile(fileName string) error {
 }
 
 func (s *S3FileProvider) GetPresignedURL(fileName string) (string, error) {
-	presignClient := s3.NewPresignClient(s.client)
+	// Faz type assertion para *s3.Client
+	client, ok := s.client.(*s3.Client)
+	if !ok {
+		return "", fmt.Errorf("client não é *s3.Client, não é possível gerar presigned URL")
+	}
+	presignClient := s3.NewPresignClient(client)
 
 	presignedRequest, err := presignClient.PresignGetObject(
 		context.TODO(),
