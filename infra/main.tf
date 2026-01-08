@@ -16,14 +16,15 @@ module "catalog_api" {
   ecs_container_environment_variables = merge(
     var.container_environment_variables,
     {
-      DB_HOST        = module.app_db.db_connection,
+      DB_HOST        = data.terraform_remote_state.infra.outputs.rds_address,
+      DB_USERNAME    = data.terraform_remote_state.infra.outputs.rds_postgres_db_username,
       API_UPLOAD_URL = module.s3_bucket.bucket_regional_domain_name != "" ? "https://${module.s3_bucket.bucket_regional_domain_name}" : ""
     }
   )
 
   ecs_container_secrets = merge(var.container_secrets,
     {
-      DB_PASSWORD : module.app_db.db_secret_password_arn
+      DB_PASSWORD : data.terraform_remote_state.infra.outputs.rds_secret_arn
     }
   )
 

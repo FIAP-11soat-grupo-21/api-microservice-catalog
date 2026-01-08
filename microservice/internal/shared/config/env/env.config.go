@@ -60,7 +60,7 @@ func getEnvOptional(key string) string {
 }
 
 func (c *Config) Load() {
-	dotEnvPath := ".env.aws"
+	dotEnvPath := ".env.local"
 	_, err := os.Stat(dotEnvPath)
 	if err == nil {
 		err := godotenv.Load(dotEnvPath)

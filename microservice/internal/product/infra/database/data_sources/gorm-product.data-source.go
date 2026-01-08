@@ -6,17 +6,19 @@ import (
 	"tech_challenge/internal/product/daos"
 	"tech_challenge/internal/product/infra/database/mappers"
 	"tech_challenge/internal/product/infra/database/models"
-	"tech_challenge/internal/shared/infra/database"
 )
 
 type GormProductDataSource struct {
 	db *gorm.DB
 }
 
-func NewProductDataSource() *GormProductDataSource {
-	return &GormProductDataSource{
-		db: database.GetDB(),
-	}
+//	func NewProductDataSource(db *gorm.DB) *GormProductDataSource {
+//		return &GormProductDataSource{
+//			db: database.GetDB(),
+//		}
+//	}
+func NewProductDataSource(db *gorm.DB) *GormProductDataSource {
+	return &GormProductDataSource{db: db}
 }
 
 func (r *GormProductDataSource) Insert(productDAO daos.ProductDAO) error {

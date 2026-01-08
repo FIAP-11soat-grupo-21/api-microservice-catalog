@@ -9,17 +9,14 @@ import (
 	database_errors "tech_challenge/internal/product/infra/database/database_errors"
 	"tech_challenge/internal/product/infra/database/mappers"
 	"tech_challenge/internal/product/infra/database/models"
-	"tech_challenge/internal/shared/infra/database"
 )
 
 type GormCategoryDataSource struct {
 	db *gorm.DB
 }
 
-func NewGormCategoryDataSource() *GormCategoryDataSource {
-	return &GormCategoryDataSource{
-		db: database.GetDB(),
-	}
+func NewGormCategoryDataSource(db *gorm.DB) *GormCategoryDataSource {
+	return &GormCategoryDataSource{db: db}
 }
 
 func (r *GormCategoryDataSource) Insert(category daos.CategoryDAO) error {

@@ -9,6 +9,7 @@ import (
 	"tech_challenge/internal/product/infra/api/schemas"
 	"tech_challenge/internal/product/infra/database/data_sources"
 	shared_factories "tech_challenge/internal/shared/factories"
+	"tech_challenge/internal/shared/infra/database"
 	"tech_challenge/internal/shared/utils"
 
 	"github.com/gin-gonic/gin"
@@ -19,8 +20,8 @@ type ProductHandler struct {
 }
 
 func NewProductHandler() *ProductHandler {
-	productDataSource := data_sources.NewProductDataSource()
-	categoryDataSource := data_sources.NewGormCategoryDataSource()
+	productDataSource := data_sources.NewProductDataSource(database.GetDB())
+	categoryDataSource := data_sources.NewGormCategoryDataSource(database.GetDB())
 	fileProvider := shared_factories.NewFileProvider()
 
 	productController := controllers.NewProductController(productDataSource, categoryDataSource, fileProvider)
