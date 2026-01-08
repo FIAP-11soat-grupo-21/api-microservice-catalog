@@ -178,6 +178,20 @@ func (mr *MockIProductDataSourceMockRecorder) SetImageAsDefault(productID, image
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetImageAsDefault", reflect.TypeOf((*MockIProductDataSource)(nil).SetImageAsDefault), productID, imageID)
 }
 
+// SetLastImageAsDefault mocks base method.
+func (m *MockIProductDataSource) SetLastImageAsDefault(productID, imageFileName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetLastImageAsDefault", productID, imageFileName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetLastImageAsDefault indicates an expected call of SetLastImageAsDefault.
+func (mr *MockIProductDataSourceMockRecorder) SetLastImageAsDefault(productID, imageFileName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastImageAsDefault", reflect.TypeOf((*MockIProductDataSource)(nil).SetLastImageAsDefault), productID, imageFileName)
+}
+
 // Update mocks base method.
 func (m *MockIProductDataSource) Update(product daos.ProductDAO) error {
 	m.ctrl.T.Helper()
