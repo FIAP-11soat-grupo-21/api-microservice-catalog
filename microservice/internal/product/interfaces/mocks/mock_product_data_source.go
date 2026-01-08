@@ -191,3 +191,31 @@ func (mr *MockIProductDataSourceMockRecorder) Update(product interface{}) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockIProductDataSource)(nil).Update), product)
 }
+
+// ImageIsDefault mocks base method.
+func (m *MockIProductDataSource) ImageIsDefault(imageFileName string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ImageIsDefault", imageFileName)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// ImageIsDefault indicates an expected call of ImageIsDefault.
+func (mr *MockIProductDataSourceMockRecorder) ImageIsDefault(imageFileName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImageIsDefault", reflect.TypeOf((*MockIProductDataSource)(nil).ImageIsDefault), imageFileName)
+}
+
+// DeleteProductImage mocks base method.
+func (m *MockIProductDataSource) DeleteProductImage(imageFileName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProductImage", imageFileName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteProductImage indicates an expected call of DeleteProductImage.
+func (mr *MockIProductDataSourceMockRecorder) DeleteProductImage(imageFileName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProductImage", reflect.TypeOf((*MockIProductDataSource)(nil).DeleteProductImage), imageFileName)
+}
