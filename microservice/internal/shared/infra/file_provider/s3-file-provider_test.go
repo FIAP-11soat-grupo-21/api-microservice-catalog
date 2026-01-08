@@ -6,10 +6,10 @@ import (
 	"os"
 	"tech_challenge/internal/product/domain/exceptions"
 	"tech_challenge/internal/shared/config/env"
+	testenv "tech_challenge/internal/shared/test"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,25 +18,29 @@ type mockS3Client struct {
 	deleteFunc func(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 }
 
+//	func TestMain(m *testing.M) {
+//		_ = godotenv.Load("../../../.env.local.example")
+//		os.Setenv("GO_ENV", "test")
+//		os.Setenv("API_PORT", "8080")
+//		os.Setenv("API_HOST", "localhost")
+//		os.Setenv("API_UPLOAD_URL", "http://localhost:8080/uploads")
+//		os.Setenv("DB_RUN_MIGRATIONS", "false")
+//		os.Setenv("DB_HOST", "localhost")
+//		os.Setenv("DB_NAME", "test_db")
+//		os.Setenv("DB_PORT", "5432")
+//		os.Setenv("DB_USERNAME", "test_user")
+//		os.Setenv("DB_PASSWORD", "test_pass")
+//		os.Setenv("AWS_REGION", "us-east-1")
+//		os.Setenv("AWS_S3_BUCKET_NAME", "test-bucket")
+//		os.Setenv("AWS_S3_PRESIGN_EXPIRATION", "3600")
+//		code := m.Run()
+//		os.Exit(code)
+//	}
 func TestMain(m *testing.M) {
-	_ = godotenv.Load("../../../.env.local.example")
-	os.Setenv("GO_ENV", "test")
-	os.Setenv("API_PORT", "8080")
-	os.Setenv("API_HOST", "localhost")
-	os.Setenv("API_UPLOAD_URL", "http://localhost:8080/uploads")
-	os.Setenv("DB_RUN_MIGRATIONS", "false")
-	os.Setenv("DB_HOST", "localhost")
-	os.Setenv("DB_NAME", "test_db")
-	os.Setenv("DB_PORT", "5432")
-	os.Setenv("DB_USERNAME", "test_user")
-	os.Setenv("DB_PASSWORD", "test_pass")
-	os.Setenv("AWS_REGION", "us-east-1")
-	os.Setenv("AWS_S3_BUCKET_NAME", "test-bucket")
-	os.Setenv("AWS_S3_PRESIGN_EXPIRATION", "3600")
+	testenv.SetupTestEnv()
 	code := m.Run()
 	os.Exit(code)
 }
-
 func (m *mockS3Client) PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
 	if m.putFunc != nil {
 		return m.putFunc(ctx, params, optFns...)
