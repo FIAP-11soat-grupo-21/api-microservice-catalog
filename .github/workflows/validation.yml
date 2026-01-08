@@ -90,23 +90,23 @@ jobs:
         run: |
           go test -v $(go list ./... | grep -v '/bdd$')
 
-  # TestBDD:
-  #   name: Run BDD Tests
-  #   runs-on: ubuntu-latest
+  TestBDD:
+    name: Run BDD Tests
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v4
-  #       with:
-  #         go-version: '1.21'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
 
-  #     - name: Execute BDD tests
-  #       working-directory: microservice
-  #       run: |
-  #         go test -v ./bdd -run TestMain          
+      - name: Execute BDD tests
+        working-directory: microservice
+        run: |
+          go test -v ./bdd -run TestMain          
 
   Validation:
     name: Terraform Plan (infra)
