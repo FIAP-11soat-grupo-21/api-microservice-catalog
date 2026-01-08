@@ -234,6 +234,26 @@ func TestProductGateway_UploadImage(t *testing.T) {
 	require.Contains(t, url, "img.jpg")
 }
 
+func TestProductGateway_UploadImage_Error(t *testing.T) {
+	gw := NewProductGateway(&mockProductDataSource{}, &mockFileProviderErrorUpload{})
+	url, err := gw.UploadImage("img.jpg", []byte("data"))
+	require.Error(t, err)
+	require.Equal(t, "", url)
+}
+
+// Mock para simular erro no UploadFile
+
+type mockFileProviderErrorUpload struct{}
+
+func (m *mockFileProviderErrorUpload) UploadFile(fileName string, fileContent []byte) error {
+	return errors.New("upload fail")
+}
+func (m *mockFileProviderErrorUpload) DeleteFile(fileName string) error { return nil }
+func (m *mockFileProviderErrorUpload) GetPresignedURL(fileName string) (string, error) {
+	return "", nil
+}
+func (m *mockFileProviderErrorUpload) DeleteFiles(fileNames []string) error { return nil }
+
 func TestProductGateway_DeleteImage(t *testing.T) {
 	gw := NewProductGateway(&mockProductDataSource{}, &mockFileProvider{})
 	require.NoError(t, gw.DeleteImage("img.jpg"))
@@ -321,6 +341,17 @@ func TestProductGateway_FindAllImagesProductById(t *testing.T) {
 	require.Len(t, prod.Images, 1)
 }
 
+func TestProductGateway_FindAllImagesProductById_Error(t *testing.T) {
+	gw := NewProductGateway(&mockProductDataSource{
+		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			return nil, errors.New("find images error")
+		},
+	}, &mockFileProvider{})
+	prod, err := gw.FindAllImagesProductById("pid")
+	require.Error(t, err)
+	require.Equal(t, entities.Product{}, prod)
+}
+
 func TestProductGateway_SetLastImageAsDefault(t *testing.T) {
 	gw := NewProductGateway(&mockProductDataSource{
 		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
@@ -329,6 +360,73 @@ func TestProductGateway_SetLastImageAsDefault(t *testing.T) {
 		setImageAsDefaultFunc: func(productID, imageID string) error { return nil },
 	}, &mockFileProvider{})
 	require.NoError(t, gw.SetLastImageAsDefault("pid", "except.jpg"))
+}
+
+func TestProductGateway_SetLastImageAsDefault_ContinueSkipExceptImage(t *testing.T) {
+	createdAt1 := time.Now().Add(-time.Hour)
+	createdAt2 := time.Now()
+	gw := NewProductGateway(&mockProductDataSource{
+		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			return []daos.ProductImageDAO{
+				{ID: "imgid1", ProductID: productID, FileName: "except.jpg", CreatedAt: createdAt1},
+				{ID: "imgid2", ProductID: productID, FileName: "img2.jpg", CreatedAt: createdAt2},
+			}, nil
+		},
+		setImageAsDefaultFunc: func(productID, imageID string) error {
+			require.Equal(t, "imgid2", imageID)
+			return nil
+		},
+	}, &mockFileProvider{})
+	err := gw.SetLastImageAsDefault("pid", "except.jpg")
+	require.NoError(t, err)
+}
+
+func TestProductGateway_SetLastImageAsDefault_FindAllImagesError(t *testing.T) {
+	gw := NewProductGateway(&mockProductDataSource{
+		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			return nil, errors.New("find images error")
+		},
+	}, &mockFileProvider{})
+	err := gw.SetLastImageAsDefault("pid", "except.jpg")
+	require.Error(t, err)
+	require.EqualError(t, err, "find images error")
+}
+
+func TestProductGateway_SetLastImageAsDefault_LastImageNil(t *testing.T) {
+	gw := NewProductGateway(&mockProductDataSource{
+		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			// Só retorna a imagem que será ignorada pelo continue
+			return []daos.ProductImageDAO{
+				{ID: "imgid1", ProductID: productID, FileName: "except.jpg", CreatedAt: time.Now()},
+			}, nil
+		},
+	}, &mockFileProvider{})
+	err := gw.SetLastImageAsDefault("pid", "except.jpg")
+	require.NoError(t, err)
+}
+
+func TestProductGateway_SetLastImageAsDefault_NoImagesLeft(t *testing.T) {
+	gw := NewProductGateway(&mockProductDataSource{
+		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			// Todas as imagens serão ignoradas pelo continue
+			return []daos.ProductImageDAO{
+				{ID: "imgid1", ProductID: productID, FileName: "except.jpg", CreatedAt: time.Now()},
+			}, nil
+		},
+	}, &mockFileProvider{})
+	err := gw.SetLastImageAsDefault("pid", "except.jpg")
+	require.NoError(t, err)
+}
+
+func TestProductGateway_SetLastImageAsDefault_ReturnNilWhenNoImages(t *testing.T) {
+	gw := NewProductGateway(&mockProductDataSource{
+		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			// Retorna slice vazio para simular nenhum registro
+			return []daos.ProductImageDAO{}, nil
+		},
+	}, &mockFileProvider{})
+	err := gw.SetLastImageAsDefault("pid", "except.jpg")
+	require.NoError(t, err)
 }
 
 func TestProductGateway_DeleteProductImage(t *testing.T) {

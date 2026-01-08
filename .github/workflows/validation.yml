@@ -41,23 +41,23 @@ jobs:
         run: |
           go test ./... -coverprofile=coverage.out
 
-      # - name: Run GolangCI-Lint
-      #   working-directory: microservice
-      #   run: |
-      #     go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-      #     echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-      #     golangci-lint run --out-format json > golangci-lint-report.json
+      - name: Run GolangCI-Lint
+        working-directory: microservice
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          golangci-lint run --out-format json > golangci-lint-report.json
 
       # - name: Show GolangCI-Lint Report
       #   working-directory: microservice
       #   run: cat golangci-lint-report.json
                   
-      # - name: Run Gosec Security Scanner
-      #   working-directory: microservice
-      #   run: |
-      #     go install github.com/securego/gosec/v2/cmd/gosec@latest
-      #     echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-      #     gosec -no-fail -fmt=sonarqube -out report.json ./...
+      - name: Run Gosec Security Scanner
+        working-directory: microservice
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          gosec -no-fail -fmt=sonarqube -out report.json ./...
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

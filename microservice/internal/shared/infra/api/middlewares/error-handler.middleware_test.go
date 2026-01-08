@@ -15,7 +15,7 @@ func TestErrorHandlerMiddleware_InternalServerError(t *testing.T) {
 	r := gin.New()
 	r.Use(ErrorHandlerMiddleware())
 	r.GET("/fail", func(c *gin.Context) {
-		c.Error(errors.New("unexpected error"))
+		_ = c.Error(errors.New("unexpected error")) // ignora o erro explicitamente
 	})
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/fail", nil)

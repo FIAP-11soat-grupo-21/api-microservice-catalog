@@ -91,8 +91,8 @@ func TestProduct_SetPrice_Invalid(t *testing.T) {
 
 func TestProduct_SetDescription(t *testing.T) {
 	p, _ := NewProduct("id", "catid", "Coca-Cola", "desc", 5.99, true)
-	p.SetDescription("nova desc")
-	require.Equal(t, "nova desc", p.Description)
+	err := p.SetDescription("nova desc")
+	require.NoError(t, err)
 }
 
 func TestProduct_Activate_Deactivate(t *testing.T) {

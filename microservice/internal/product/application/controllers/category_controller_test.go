@@ -11,29 +11,29 @@ import (
 	"tech_challenge/internal/product/daos"
 )
 
-type mockCategoryDataSource struct {
-	insertFunc   func(dao daos.CategoryDAO) error
-	findAllFunc  func() ([]daos.CategoryDAO, error)
-	findByIDFunc func(id string) (daos.CategoryDAO, error)
-	updateFunc   func(dao daos.CategoryDAO) error
-	deleteFunc   func(id string) error
-}
+// type mockCategoryDataSource struct {
+// 	insertFunc   func(dao daos.CategoryDAO) error
+// 	findAllFunc  func() ([]daos.CategoryDAO, error)
+// 	findByIDFunc func(id string) (daos.CategoryDAO, error)
+// 	updateFunc   func(dao daos.CategoryDAO) error
+// 	deleteFunc   func(id string) error
+// }
 
-func (m *mockCategoryDataSource) Insert(dao daos.CategoryDAO) error {
-	return m.insertFunc(dao)
-}
-func (m *mockCategoryDataSource) FindAll() ([]daos.CategoryDAO, error) {
-	return m.findAllFunc()
-}
-func (m *mockCategoryDataSource) FindByID(id string) (daos.CategoryDAO, error) {
-	return m.findByIDFunc(id)
-}
-func (m *mockCategoryDataSource) Update(dao daos.CategoryDAO) error {
-	return m.updateFunc(dao)
-}
-func (m *mockCategoryDataSource) Delete(id string) error {
-	return m.deleteFunc(id)
-}
+// func (m *mockCategoryDataSource) Insert(dao daos.CategoryDAO) error {
+// 	return m.insertFunc(dao)
+// }
+// func (m *mockCategoryDataSource) FindAll() ([]daos.CategoryDAO, error) {
+// 	return m.findAllFunc()
+// }
+// func (m *mockCategoryDataSource) FindByID(id string) (daos.CategoryDAO, error) {
+// 	return m.findByIDFunc(id)
+// }
+// func (m *mockCategoryDataSource) Update(dao daos.CategoryDAO) error {
+// 	return m.updateFunc(dao)
+// }
+// func (m *mockCategoryDataSource) Delete(id string) error {
+// 	return m.deleteFunc(id)
+// }
 
 func TestCategoryController_Create_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
