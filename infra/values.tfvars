@@ -20,7 +20,7 @@ container_environment_variables = {
   AWS_S3_BUCKET_NAME : "product-photo-fiap-tech-challenge-catalog"
   AWS_S3_PRESIGN_EXPIRATION : "5m"
   AWS_S3_ENDPOINT : ""
-  # API_UPLOAD_URL será preenchida automaticamente pelo Terraform no main-2.tf usando o output do módulo S3
+  # API_UPLOAD_URL será preenchida automaticamente pelo Terraform no main.tf usando o output do módulo S3
   # Exemplo de valor: https://product-photo-fiap-tech-challenge-catalog.s3.us-east-2.amazonaws.com
 }
 container_secrets = {}

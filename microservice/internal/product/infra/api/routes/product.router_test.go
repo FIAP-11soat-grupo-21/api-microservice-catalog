@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -9,12 +8,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRegisterProductRoutes(t *testing.T) {
+func setupProductTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	group := r.Group("/products")
-
-	// Registra handlers dummy para evitar acesso ao banco
 	group.POST("", func(c *gin.Context) { c.Status(201) })
 	group.GET("", func(c *gin.Context) { c.Status(200) })
 	group.GET(":id", func(c *gin.Context) { c.Status(200) })
@@ -23,52 +20,30 @@ func TestRegisterProductRoutes(t *testing.T) {
 	group.PATCH(":id/images", func(c *gin.Context) { c.Status(200) })
 	group.DELETE(":id/images/:image_file_name", func(c *gin.Context) { c.Status(204) })
 	group.DELETE(":id", func(c *gin.Context) { c.Status(204) })
+	return r
+}
 
-	// Test POST /products
-	req := httptest.NewRequest(http.MethodPost, "/products", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test GET /products
-	req = httptest.NewRequest(http.MethodGet, "/products", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test GET /products/:id
-	req = httptest.NewRequest(http.MethodGet, "/products/1", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test GET /products/:id/images
-	req = httptest.NewRequest(http.MethodGet, "/products/1/images", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test PUT /products/:id
-	req = httptest.NewRequest(http.MethodPut, "/products/1", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test PATCH /products/:id/images
-	req = httptest.NewRequest(http.MethodPatch, "/products/1/images", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test DELETE /products/:id/images/:image_file_name
-	req = httptest.NewRequest(http.MethodDelete, "/products/1/images/img.jpg", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
-
-	// Test DELETE /products/:id
-	req = httptest.NewRequest(http.MethodDelete, "/products/1", nil)
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	require.NotEqual(t, 404, w.Code)
+func TestRegisterProductRoutes(t *testing.T) {
+	r := setupProductTestRouter()
+	endpoints := []struct {
+		method string
+		path   string
+		want   int
+	}{
+		{"POST", "/products", 201},
+		{"GET", "/products", 200},
+		{"GET", "/products/1", 200},
+		{"GET", "/products/1/images", 200},
+		{"PUT", "/products/1", 200},
+		{"PATCH", "/products/1/images", 200},
+		{"DELETE", "/products/1/images/img.jpg", 204},
+		{"DELETE", "/products/1", 204},
+	}
+	for _, ep := range endpoints {
+		req := httptest.NewRequest(ep.method, ep.path, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		require.NotEqual(t, 404, w.Code)
+		require.Equal(t, ep.want, w.Code)
+	}
 }
