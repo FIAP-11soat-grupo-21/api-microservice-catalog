@@ -82,7 +82,7 @@ module "GetCatalogAPIRoute" {
     },
     create_product = {
       route_key           = "POST /products"
-      restricted          = true
+      restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     update_product = {

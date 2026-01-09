@@ -77,9 +77,6 @@ func (s *S3FileProvider) UploadFile(fileName string, fileContent []byte) error {
 	})
 
 	if err != nil {
-		fmt.Printf("Erro: %v\n", err.Error())
-		fmt.Printf("Bucket: %s\n", s.bucketName)
-		fmt.Printf("Key: %s\n", fileName)
 		if strings.Contains(err.Error(), "NoSuchBucket") || strings.Contains(err.Error(), "InvalidBucketName") {
 			return &exceptions.BucketNotFoundException{}
 		}
@@ -90,8 +87,7 @@ func (s *S3FileProvider) UploadFile(fileName string, fileContent []byte) error {
 }
 
 func (s *S3FileProvider) DeleteFile(fileName string) error {
-	fmt.Printf("[S3FileProvider] Tentando deletar do bucket: %s, arquivo: %s\n", s.bucketName, fileName)
-	resp, err := s.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+	_, err := s.client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(fileName),
 	})
@@ -99,7 +95,6 @@ func (s *S3FileProvider) DeleteFile(fileName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete file: %w", err)
 	}
-	fmt.Printf("[S3FileProvider] DeleteObject response: %+v\n", resp)
 	return nil
 }
 

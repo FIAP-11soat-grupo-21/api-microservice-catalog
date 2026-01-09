@@ -117,3 +117,37 @@ func TestUpdateProductUseCase_DeactivateReturnNil(t *testing.T) {
 	_, err := uc.Execute(productDTO)
 	require.NoError(t, err)
 }
+
+func TestUpdateProductUseCase_SetPriceError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockProductDataSource := mock_interfaces.NewMockIProductDataSource(ctrl)
+	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	categoryID := "cat-1"
+	productDTO := makeProductDTO("pid", categoryID, "Produto Teste", "Descrição", -1.0, true)
+	mockProductDataSource.EXPECT().FindByID("pid").Return(daos.ProductDAO{
+		ID: "pid", CategoryID: categoryID, Name: "Produto Teste", Description: "Descrição", Price: 10.0, Active: true,
+	}, nil)
+	mockProductDataSource.EXPECT().Update(gomock.Any()).Return(nil).AnyTimes()
+	productGateway := gateways.NewProductGateway(mockProductDataSource, mockFileProvider)
+	uc := use_cases.NewUpdateProductUseCase(*productGateway)
+	_, err := uc.Execute(productDTO)
+	require.Error(t, err)
+}
+
+func TestUpdateProductUseCase_SetCategoryReturnNil(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockProductDataSource := mock_interfaces.NewMockIProductDataSource(ctrl)
+	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	categoryID := ""
+	productDTO := makeProductDTO("pid", categoryID, "Produto Teste", "Descrição", 10.0, true)
+	mockProductDataSource.EXPECT().FindByID("pid").Return(daos.ProductDAO{
+		ID: "pid", CategoryID: "cat-1", Name: "Produto Teste", Description: "Descrição", Price: 10.0, Active: true,
+	}, nil)
+	mockProductDataSource.EXPECT().Update(gomock.Any()).Return(nil).AnyTimes()
+	productGateway := gateways.NewProductGateway(mockProductDataSource, mockFileProvider)
+	uc := use_cases.NewUpdateProductUseCase(*productGateway)
+	_, err := uc.Execute(productDTO)
+	require.Nil(t, err)
+}

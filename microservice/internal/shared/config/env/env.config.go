@@ -1,7 +1,6 @@
 package env
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -42,7 +41,6 @@ func GetConfig() *Config {
 	once.Do(func() {
 		instance = &Config{}
 		instance.Load()
-		fmt.Printf("[DEBUG] Configuração final: Bucket=%s, Endpoint=%s, Region=%s\n", instance.AWS.S3.BucketName, instance.AWS.S3.Endpoint, instance.AWS.Region)
 	})
 	return instance
 }
@@ -86,7 +84,7 @@ func (c *Config) Load() {
 	c.AWS.Region = getEnv("AWS_REGION")
 
 	c.AWS.S3.BucketName = getEnv("AWS_S3_BUCKET_NAME")
-	fmt.Printf("[Config] Bucket lido do env: %s\n", c.AWS.S3.BucketName)
+
 	c.AWS.S3.Endpoint = getEnvOptional("AWS_S3_ENDPOINT")
 	c.AWS.S3.PresignExpiration = getEnv("AWS_S3_PRESIGN_EXPIRATION")
 }
