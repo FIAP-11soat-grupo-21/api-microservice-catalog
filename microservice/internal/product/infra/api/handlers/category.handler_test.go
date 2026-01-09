@@ -12,12 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"tech_challenge/internal/product/daos"
+	testmocks "tech_challenge/internal/shared/test"
 )
 
 func TestFindAllCategories_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		findAllFunc: func() ([]daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		FindAllFunc: func() ([]daos.CategoryDAO, error) {
 			return []daos.CategoryDAO{{ID: "1", Name: "Bebidas", Active: true}}, nil
 		},
 	}
@@ -41,8 +42,8 @@ func TestFindAllCategories_Success(t *testing.T) {
 
 func TestFindAllCategories_Error(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		findAllFunc: func() ([]daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		FindAllFunc: func() ([]daos.CategoryDAO, error) {
 			return nil, errors.New("mock error")
 		},
 	}
@@ -67,8 +68,8 @@ func TestFindAllCategories_Error(t *testing.T) {
 
 func TestFindCategoryByID_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -91,8 +92,8 @@ func TestFindCategoryByID_Success(t *testing.T) {
 
 func TestFindCategoryByID_Error(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{}, errors.New("not found")
 		},
 	}
@@ -116,8 +117,8 @@ func TestFindCategoryByID_Error(t *testing.T) {
 
 func TestCreateCategory_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		insertFunc: func(dao daos.CategoryDAO) error { return nil },
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		InsertFunc: func(dao daos.CategoryDAO) error { return nil },
 	}
 	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
 
@@ -140,7 +141,7 @@ func TestCreateCategory_Success(t *testing.T) {
 
 func TestCreateCategory_BadRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{}
+	mockCategoryDs := &testmocks.MockCategoryDataSource{}
 	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
 
 	r := gin.New()
@@ -162,8 +163,8 @@ func TestCreateCategory_BadRequest(t *testing.T) {
 
 func TestCreateCategory_Error(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		insertFunc: func(dao daos.CategoryDAO) error { return errors.New("create error") },
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		InsertFunc: func(dao daos.CategoryDAO) error { return errors.New("create error") },
 	}
 	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
 
@@ -187,9 +188,9 @@ func TestCreateCategory_Error(t *testing.T) {
 
 func TestUpdateCategory_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		updateFunc: func(dao daos.CategoryDAO) error { return nil },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		UpdateFunc: func(dao daos.CategoryDAO) error { return nil },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -214,7 +215,7 @@ func TestUpdateCategory_Success(t *testing.T) {
 
 func TestUpdateCategory_BadRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{}
+	mockCategoryDs := &testmocks.MockCategoryDataSource{}
 	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
 
 	r := gin.New()
@@ -236,9 +237,9 @@ func TestUpdateCategory_BadRequest(t *testing.T) {
 
 func TestUpdateCategory_Error(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		updateFunc: func(dao daos.CategoryDAO) error { return errors.New("update error") },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		UpdateFunc: func(dao daos.CategoryDAO) error { return errors.New("update error") },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -264,9 +265,9 @@ func TestUpdateCategory_Error(t *testing.T) {
 
 func TestDeleteCategory_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		deleteFunc: func(id string) error { return nil },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		DeleteFunc: func(id string) error { return nil },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -284,9 +285,9 @@ func TestDeleteCategory_Success(t *testing.T) {
 
 func TestDeleteCategory_Error(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockCategoryDs := &mockCategoryDataSource{
-		deleteFunc: func(id string) error { return errors.New("delete error") },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockCategoryDs := &testmocks.MockCategoryDataSource{
+		DeleteFunc: func(id string) error { return errors.New("delete error") },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}

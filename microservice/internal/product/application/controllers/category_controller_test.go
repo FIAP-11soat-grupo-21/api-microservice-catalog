@@ -9,37 +9,14 @@ import (
 
 	"tech_challenge/internal/product/application/dtos"
 	"tech_challenge/internal/product/daos"
+	testmocks "tech_challenge/internal/shared/test"
 )
-
-// type mockCategoryDataSource struct {
-// 	insertFunc   func(dao daos.CategoryDAO) error
-// 	findAllFunc  func() ([]daos.CategoryDAO, error)
-// 	findByIDFunc func(id string) (daos.CategoryDAO, error)
-// 	updateFunc   func(dao daos.CategoryDAO) error
-// 	deleteFunc   func(id string) error
-// }
-
-// func (m *mockCategoryDataSource) Insert(dao daos.CategoryDAO) error {
-// 	return m.insertFunc(dao)
-// }
-// func (m *mockCategoryDataSource) FindAll() ([]daos.CategoryDAO, error) {
-// 	return m.findAllFunc()
-// }
-// func (m *mockCategoryDataSource) FindByID(id string) (daos.CategoryDAO, error) {
-// 	return m.findByIDFunc(id)
-// }
-// func (m *mockCategoryDataSource) Update(dao daos.CategoryDAO) error {
-// 	return m.updateFunc(dao)
-// }
-// func (m *mockCategoryDataSource) Delete(id string) error {
-// 	return m.deleteFunc(id)
-// }
 
 func TestCategoryController_Create_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockDS := &mockCategoryDataSource{
-		insertFunc: func(dao daos.CategoryDAO) error { return nil },
+	mockDS := &testmocks.MockCategoryDataSource{
+		InsertFunc: func(dao daos.CategoryDAO) error { return nil },
 	}
 	c := NewCategoryController(mockDS)
 	dto := dtos.CreateCategoryDTO{Name: "Bebidas", Active: true}
@@ -51,8 +28,8 @@ func TestCategoryController_Create_Success(t *testing.T) {
 func TestCategoryController_Create_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockDS := &mockCategoryDataSource{
-		insertFunc: func(dao daos.CategoryDAO) error { return errors.New("fail") },
+	mockDS := &testmocks.MockCategoryDataSource{
+		InsertFunc: func(dao daos.CategoryDAO) error { return errors.New("fail") },
 	}
 	c := NewCategoryController(mockDS)
 	dto := dtos.CreateCategoryDTO{Name: "Bebidas", Active: true}
@@ -61,8 +38,8 @@ func TestCategoryController_Create_Error(t *testing.T) {
 }
 
 func TestCategoryController_FindByID_Success(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockDS := &testmocks.MockCategoryDataSource{
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -73,8 +50,8 @@ func TestCategoryController_FindByID_Success(t *testing.T) {
 }
 
 func TestCategoryController_FindByID_Error(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) { return daos.CategoryDAO{}, errors.New("fail") },
+	mockDS := &testmocks.MockCategoryDataSource{
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) { return daos.CategoryDAO{}, errors.New("fail") },
 	}
 	c := NewCategoryController(mockDS)
 	_, err := c.FindByID("catid")
@@ -82,8 +59,8 @@ func TestCategoryController_FindByID_Error(t *testing.T) {
 }
 
 func TestCategoryController_FindAll_Success(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		findAllFunc: func() ([]daos.CategoryDAO, error) {
+	mockDS := &testmocks.MockCategoryDataSource{
+		FindAllFunc: func() ([]daos.CategoryDAO, error) {
 			return []daos.CategoryDAO{{ID: "catid", Name: "Bebidas", Active: true}}, nil
 		},
 	}
@@ -95,8 +72,8 @@ func TestCategoryController_FindAll_Success(t *testing.T) {
 }
 
 func TestCategoryController_FindAll_Error(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		findAllFunc: func() ([]daos.CategoryDAO, error) { return nil, errors.New("fail") },
+	mockDS := &testmocks.MockCategoryDataSource{
+		FindAllFunc: func() ([]daos.CategoryDAO, error) { return nil, errors.New("fail") },
 	}
 	c := NewCategoryController(mockDS)
 	_, err := c.FindAll()
@@ -104,9 +81,9 @@ func TestCategoryController_FindAll_Error(t *testing.T) {
 }
 
 func TestCategoryController_Update_Success(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		updateFunc: func(dao daos.CategoryDAO) error { return nil },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockDS := &testmocks.MockCategoryDataSource{
+		UpdateFunc: func(dao daos.CategoryDAO) error { return nil },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -118,9 +95,9 @@ func TestCategoryController_Update_Success(t *testing.T) {
 }
 
 func TestCategoryController_Update_Error(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		updateFunc: func(dao daos.CategoryDAO) error { return errors.New("fail") },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockDS := &testmocks.MockCategoryDataSource{
+		UpdateFunc: func(dao daos.CategoryDAO) error { return errors.New("fail") },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -131,9 +108,9 @@ func TestCategoryController_Update_Error(t *testing.T) {
 }
 
 func TestCategoryController_Delete_Success(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		deleteFunc: func(id string) error { return nil },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockDS := &testmocks.MockCategoryDataSource{
+		DeleteFunc: func(id string) error { return nil },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
@@ -142,9 +119,9 @@ func TestCategoryController_Delete_Success(t *testing.T) {
 }
 
 func TestCategoryController_Delete_Error(t *testing.T) {
-	mockDS := &mockCategoryDataSource{
-		deleteFunc: func(id string) error { return errors.New("fail") },
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
+	mockDS := &testmocks.MockCategoryDataSource{
+		DeleteFunc: func(id string) error { return errors.New("fail") },
+		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
