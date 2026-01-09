@@ -17,35 +17,35 @@ import (
 	testmocks "tech_challenge/internal/shared/test"
 )
 
-func setupProductHandlerTest(
-	findAllFunc func() ([]daos.ProductDAO, error),
-	findByIDFunc func(string) (daos.ProductDAO, error),
-	findAllImagesProductByIdFunc func(string) ([]daos.ProductImageDAO, error),
-	insertFunc func(daos.ProductDAO) error,
-	updateFunc func(daos.ProductDAO) error,
-	deleteFunc func(string) error,
-	deleteImageFunc func(string) error,
-	mockCategoryFindByID func(string) (daos.CategoryDAO, error),
-) (*gin.Engine, *httptest.ResponseRecorder, *ProductHandler) {
-	gin.SetMode(gin.TestMode)
-	mockProductDs := &testmocks.MockProductDataSource{
-		FindAllFunc:                  findAllFunc,
-		FindByIDFunc:                 findByIDFunc,
-		FindAllImagesProductByIdFunc: findAllImagesProductByIdFunc,
-		InsertFunc:                   insertFunc,
-		UpdateFunc:                   updateFunc,
-		DeleteFunc:                   deleteFunc,
-		DeleteImageFunc:              deleteImageFunc,
-	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: mockCategoryFindByID,
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
-	r := gin.New()
-	w := httptest.NewRecorder()
-	return r, w, h
-}
+// func setupProductHandlerTest(
+// 	findAllFunc func() ([]daos.ProductDAO, error),
+// 	findByIDFunc func(string) (daos.ProductDAO, error),
+// 	findAllImagesProductByIdFunc func(string) ([]daos.ProductImageDAO, error),
+// 	insertFunc func(daos.ProductDAO) error,
+// 	updateFunc func(daos.ProductDAO) error,
+// 	deleteFunc func(string) error,
+// 	deleteImageFunc func(string) error,
+// 	mockCategoryFindByID func(string) (daos.CategoryDAO, error),
+// ) (*gin.Engine, *httptest.ResponseRecorder, *ProductHandler) {
+// 	gin.SetMode(gin.TestMode)
+// 	mockProductDs := &testmocks.MockProductDataSource{
+// 		FindAllFunc:                  findAllFunc,
+// 		FindByIDFunc:                 findByIDFunc,
+// 		FindAllImagesProductByIdFunc: findAllImagesProductByIdFunc,
+// 		InsertFunc:                   insertFunc,
+// 		UpdateFunc:                   updateFunc,
+// 		DeleteFunc:                   deleteFunc,
+// 		DeleteImageFunc:              deleteImageFunc,
+// 	}
+// 	mockCategoryDs := &testmocks.MockCategoryDataSource{
+// 		FindByIDFunc: mockCategoryFindByID,
+// 	}
+// 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+// 	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+// 	r := gin.New()
+// 	w := httptest.NewRecorder()
+// 	return r, w, h
+// }
 
 func TestFindAllProducts_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
