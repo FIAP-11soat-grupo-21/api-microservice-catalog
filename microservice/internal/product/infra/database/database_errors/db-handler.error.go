@@ -12,7 +12,7 @@ func HandleDatabaseErrors(err error) error {
 	}
 
 	fmt.Printf("[HandleDatabaseErrors] Mensagem de erro: %v\n", err.Error())
-	code := extractDatabaseState(err.Error())
+	code := ExtractDatabaseState(err.Error())
 	fmt.Printf("[HandleDatabaseErrors] SQLSTATE extraído: %v\n", code)
 	switch code {
 	case "":
@@ -26,7 +26,7 @@ func HandleDatabaseErrors(err error) error {
 	return err
 }
 
-func extractDatabaseState(msg string) string {
+func ExtractDatabaseState(msg string) string {
 	re := regexp.MustCompile(`SQLSTATE (\d{5})`)
 	matches := re.FindStringSubmatch(msg)
 	if len(matches) == 2 {

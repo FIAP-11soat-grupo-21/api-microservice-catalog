@@ -13,18 +13,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestProductController_Create_Error(t *testing.T) {
+func setupProductControllerTest(t *testing.T) (*mockCategoryDataSource, *mockProductDataSource, *mock_interfaces.MockIFileProvider, *gomock.Controller) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 	mockCategoryDs := &mockCategoryDataSource{
 		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
-	mockProductDs := &mockProductDataSource{
-		insertFunc: func(dao daos.ProductDAO) error { return nil },
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs := &mockProductDataSource{}
+	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	return mockCategoryDs, mockProductDs, mockFileProvider, ctrl
+}
+
+func TestProductController_Create_Error(t *testing.T) {
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
+	defer ctrl.Finish()
+	mockProductDs.insertFunc = func(dao daos.ProductDAO) error { return nil }
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	productDTO := dtos.CreateProductDTO{
 		CategoryID:  "cat1",
@@ -43,17 +47,9 @@ func TestProductController_Create_Error(t *testing.T) {
 }
 
 func TestProductController_Create_ReturnsError(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockProductDs := &mockProductDataSource{
-		insertFunc: func(dao daos.ProductDAO) error { return errors.New("insert error") },
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs.insertFunc = func(dao daos.ProductDAO) error { return errors.New("insert error") }
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	productDTO := dtos.CreateProductDTO{
 		CategoryID:  "cat1",
@@ -68,19 +64,11 @@ func TestProductController_Create_ReturnsError(t *testing.T) {
 }
 
 func TestProductController_FindByID_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	res, err := c.FindByID("pid")
 	require.NoError(t, err)
@@ -89,19 +77,11 @@ func TestProductController_FindByID_Success(t *testing.T) {
 }
 
 func TestProductController_FindByID_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{}, errors.New("not found")
 	}
-	mockProductDs := &mockProductDataSource{
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{}, errors.New("not found")
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	res, err := c.FindByID("pid")
 	require.Error(t, err)
@@ -109,21 +89,13 @@ func TestProductController_FindByID_Error(t *testing.T) {
 }
 
 func TestProductController_FindAll_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findAllFunc = func() ([]daos.ProductDAO, error) {
+		return []daos.ProductDAO{
+			{ID: "pid", Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true},
+		}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findAllFunc: func() ([]daos.ProductDAO, error) {
-			return []daos.ProductDAO{
-				{ID: "pid", Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true},
-			}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	res, err := c.FindAll(nil)
 	require.NoError(t, err)
@@ -132,19 +104,11 @@ func TestProductController_FindAll_Success(t *testing.T) {
 }
 
 func TestProductController_FindAll_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findAllFunc = func() ([]daos.ProductDAO, error) {
+		return nil, errors.New("find all error")
 	}
-	mockProductDs := &mockProductDataSource{
-		findAllFunc: func() ([]daos.ProductDAO, error) {
-			return nil, errors.New("find all error")
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	res, err := c.FindAll(nil)
 	require.Error(t, err)
@@ -152,20 +116,12 @@ func TestProductController_FindAll_Error(t *testing.T) {
 }
 
 func TestProductController_Update_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.updateFunc = func(dao daos.ProductDAO) error { return nil }
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{ID: id, Name: "Produto Atualizado", Description: "desc", Price: 20.0, CategoryID: "cat1", Active: true}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		updateFunc: func(dao daos.ProductDAO) error { return nil },
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "Produto Atualizado", Description: "desc", Price: 20.0, CategoryID: "cat1", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	updateDTO := dtos.UpdateProductDTO{
 		ID:          "pid",
@@ -182,17 +138,9 @@ func TestProductController_Update_Success(t *testing.T) {
 }
 
 func TestProductController_Update_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockProductDs := &mockProductDataSource{
-		updateFunc: func(dao daos.ProductDAO) error { return errors.New("update error") },
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs.updateFunc = func(dao daos.ProductDAO) error { return errors.New("update error") }
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	updateDTO := dtos.UpdateProductDTO{
 		ID:          "pid",
@@ -208,20 +156,12 @@ func TestProductController_Update_Error(t *testing.T) {
 }
 
 func TestProductController_UploadImage_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: "pid", Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
-		},
-		uploadImageFunc: func(uploadDTO dtos.UploadProductImageDTO) error { return nil },
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs.uploadImageFunc = func(uploadDTO dtos.UploadProductImageDTO) error { return nil }
 	mockFileProvider.EXPECT().UploadFile(gomock.Any(), gomock.Any()).Return(nil)
 	mockFileProvider.EXPECT().GetPresignedURL(gomock.Any()).Return("http://localhost:8080/uploads/test-bucket/img.jpg", nil).AnyTimes()
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
@@ -235,20 +175,12 @@ func TestProductController_UploadImage_Success(t *testing.T) {
 }
 
 func TestProductController_UploadImage_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
-		},
-		uploadImageFunc: func(uploadDTO dtos.UploadProductImageDTO) error { return errors.New("upload error") },
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs.uploadImageFunc = func(uploadDTO dtos.UploadProductImageDTO) error { return errors.New("upload error") }
 	mockFileProvider.EXPECT().UploadFile(gomock.Any(), gomock.Any()).Return(errors.New("upload error"))
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	uploadDTO := dtos.UploadProductImageDTO{
@@ -261,26 +193,18 @@ func TestProductController_UploadImage_Error(t *testing.T) {
 }
 
 func TestProductController_DeleteImage_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
-		},
-		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
-			return []daos.ProductImageDAO{
-				{ID: "imgid1", ProductID: productID, FileName: "img.jpg", CreatedAt: time.Now()},
-				{ID: "imgid2", ProductID: productID, FileName: "img2.jpg", CreatedAt: time.Now()},
-			}, nil
-		},
-		deleteImageFunc: func(imageFileName string) error { return nil },
+	mockProductDs.findAllImagesProductByIdFunc = func(productID string) ([]daos.ProductImageDAO, error) {
+		return []daos.ProductImageDAO{
+			{ID: "imgid1", ProductID: productID, FileName: "img.jpg", CreatedAt: time.Now()},
+			{ID: "imgid2", ProductID: productID, FileName: "img2.jpg", CreatedAt: time.Now()},
+		}, nil
 	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs.deleteImageFunc = func(imageFileName string) error { return nil }
 	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes()
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	err := c.DeleteImage("pid", "img.jpg")
@@ -288,37 +212,21 @@ func TestProductController_DeleteImage_Success(t *testing.T) {
 }
 
 func TestProductController_DeleteImage_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockProductDs := &mockProductDataSource{
-		deleteImageFunc: func(imageFileName string) error { return errors.New("delete image error") },
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs.deleteImageFunc = func(imageFileName string) error { return errors.New("delete image error") }
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	err := c.DeleteImage("pid", "img.jpg")
 	require.Error(t, err)
 }
 
 func TestProductController_Delete_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findByIDFunc = func(id string) (daos.ProductDAO, error) {
+		return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "Produto Teste", Description: "desc", Price: 10.0, CategoryID: "cat1", Active: true}, nil
-		},
-		deleteFunc: func(id string) error { return nil },
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs.deleteFunc = func(id string) error { return nil }
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	err := c.Delete("pid")
@@ -326,39 +234,23 @@ func TestProductController_Delete_Success(t *testing.T) {
 }
 
 func TestProductController_Delete_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockProductDs := &mockProductDataSource{
-		deleteFunc: func(id string) error { return errors.New("delete error") },
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs.deleteFunc = func(id string) error { return errors.New("delete error") }
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	err := c.Delete("pid")
 	require.Error(t, err)
 }
 
 func TestProductController_FindAllImagesProductById_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findAllImagesProductByIdFunc = func(productID string) ([]daos.ProductImageDAO, error) {
+		return []daos.ProductImageDAO{
+			{ID: "imgid1", ProductID: productID, FileName: "img.jpg", CreatedAt: time.Now()},
+			{ID: "imgid2", ProductID: productID, FileName: "img2.jpg", CreatedAt: time.Now()},
+		}, nil
 	}
-	mockProductDs := &mockProductDataSource{
-		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
-			return []daos.ProductImageDAO{
-				{ID: "imgid1", ProductID: productID, FileName: "img.jpg", CreatedAt: time.Now()},
-				{ID: "imgid2", ProductID: productID, FileName: "img2.jpg", CreatedAt: time.Now()},
-			}, nil
-		},
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	res, err := c.FindAllImagesProductById("pid")
 	require.NoError(t, err)
@@ -367,19 +259,11 @@ func TestProductController_FindAllImagesProductById_Success(t *testing.T) {
 }
 
 func TestProductController_FindAllImagesProductById_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	mockCategoryDs, mockProductDs, mockFileProvider, ctrl := setupProductControllerTest(t)
 	defer ctrl.Finish()
-	mockCategoryDs := &mockCategoryDataSource{
-		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
+	mockProductDs.findAllImagesProductByIdFunc = func(productID string) ([]daos.ProductImageDAO, error) {
+		return nil, errors.New("find images error")
 	}
-	mockProductDs := &mockProductDataSource{
-		findAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
-			return nil, errors.New("find images error")
-		},
-	}
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	res, err := c.FindAllImagesProductById("pid")
 	require.Error(t, err)

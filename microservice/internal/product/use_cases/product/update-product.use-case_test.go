@@ -13,23 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// type mockProductGateway struct {
-// 	FindByIDFunc func(id string) (entities.Product, error)
-// 	UpdateFunc   func(product entities.Product) error
-// }
-
-// func (m *mockProductGateway) FindByID(id string) (entities.Product, error) {
-// 	return m.FindByIDFunc(id)
-// }
-// func (m *mockProductGateway) Update(product entities.Product) error {
-// 	return m.UpdateFunc(product)
-// }
-
-// func makeProduct() entities.Product {
-// 	p, _ := entities.NewProduct("pid", "catid", "nome", "desc", 10.0, true)
-// 	return *p
-// }
-
 func makeProductDTO(id, categoryID, name, description string, price float64, active bool) dtos.UpdateProductDTO {
 	return dtos.UpdateProductDTO{
 		ID:          id,
