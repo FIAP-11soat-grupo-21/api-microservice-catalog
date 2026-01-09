@@ -15,161 +15,35 @@ import (
 	mock_interfaces "tech_challenge/internal/product/interfaces/mocks"
 )
 
-// type mockProductDataSource struct {
-// 	insertFunc                   func(dao daos.ProductDAO) error
-// 	findAllFunc                  func() ([]daos.ProductDAO, error)
-// 	findByIDFunc                 func(id string) (daos.ProductDAO, error)
-// 	updateFunc                   func(dao daos.ProductDAO) error
-// 	deleteFunc                   func(id string) error
-// 	addProductImageFunc          func(img daos.ProductImageDAO) error
-// 	deleteImageFunc              func(imageFileName string) error
-// 	findAllImagesProductByIdFunc func(productID string) ([]daos.ProductImageDAO, error)
-// 	uploadImageFunc              func(dto dtos.UploadProductImageDTO) error
-// }
-
-// func (m *mockProductDataSource) Insert(dao daos.ProductDAO) error {
-// 	if m.insertFunc != nil {
-// 		return m.insertFunc(dao)
-// 	}
-// 	return nil
-// }
-// func (m *mockProductDataSource) FindAll() ([]daos.ProductDAO, error) {
-// 	if m.findAllFunc != nil {
-// 		return m.findAllFunc()
-// 	}
-// 	return nil, nil
-// }
-// func (m *mockProductDataSource) FindByID(id string) (daos.ProductDAO, error) {
-// 	if m.findByIDFunc != nil {
-// 		return m.findByIDFunc(id)
-// 	}
-// 	return daos.ProductDAO{}, nil
-// }
-// func (m *mockProductDataSource) Update(dao daos.ProductDAO) error {
-// 	if m.updateFunc != nil {
-// 		return m.updateFunc(dao)
-// 	}
-// 	return nil
-// }
-// func (m *mockProductDataSource) Delete(id string) error {
-// 	if m.deleteFunc != nil {
-// 		return m.deleteFunc(id)
-// 	}
-// 	return nil
-// }
-// func (m *mockProductDataSource) AddProductImage(img daos.ProductImageDAO) error {
-// 	if m.addProductImageFunc != nil {
-// 		return m.addProductImageFunc(img)
-// 	}
-// 	return nil
-// }
-
-// Corrige a assinatura do método DeleteImage para bater com a interface
-// func (m *mockProductDataSource) DeleteImage(imageFileName string) error {
-// 	if m.deleteImageFunc != nil {
-// 		return m.deleteImageFunc(imageFileName)
-// 	}
-// 	return nil
-// }
-// func (m *mockProductDataSource) SetAllPreviousImagesAsNotDefault(productID, exceptImageID string) error {
-// 	return nil
-// }
-// func (m *mockProductDataSource) FindAllImagesProductById(productID string) ([]daos.ProductImageDAO, error) {
-// 	if m.findAllImagesProductByIdFunc != nil {
-// 		// Garante que sempre retorna pelo menos uma imagem para o produto
-// 		imgs, err := m.findAllImagesProductByIdFunc(productID)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		if len(imgs) == 0 {
-// 			return []daos.ProductImageDAO{{ID: "imgid", ProductID: productID, FileName: "img.jpg", IsDefault: true}}, nil
-// 		}
-// 		return imgs, nil
-// 	}
-// 	return []daos.ProductImageDAO{{ID: "imgid", ProductID: productID, FileName: "img.jpg", IsDefault: true}}, nil
-// }
-// func (m *mockProductDataSource) SetImageAsDefault(productID, imageID string) error {
-// 	return nil
-// }
-// func (m *mockProductDataSource) FindAllByCategoryID(categoryID string) ([]daos.ProductDAO, error) {
-// 	return nil, nil
-// }
-
-// type fakeProductGateway struct {
-// 	FindAllFn         func(categoryID *string) ([]dtos.ProductResultDTO, error)
-// 	AddProductImageFn func(img daos.ProductImageDAO) error
-// 	FindByIDFn        func(id string) (dtos.ProductResultDTO, error)
-// }
-
-// func (f *fakeProductGateway) FindAll(categoryID *string) ([]dtos.ProductResultDTO, error) {
-// 	if f.FindAllFn != nil {
-// 		return f.FindAllFn(categoryID)
-// 	}
-// 	return []dtos.ProductResultDTO{}, nil
-// }
-// func (f *fakeProductGateway) AddProductImage(img daos.ProductImageDAO) error {
-// 	if f.AddProductImageFn != nil {
-// 		return f.AddProductImageFn(img)
-// 	}
-// 	return nil
-// }
-// func (f *fakeProductGateway) FindByID(id string) (dtos.ProductResultDTO, error) {
-// 	if f.FindByIDFn != nil {
-// 		return f.FindByIDFn(id)
-// 	}
-// 	return dtos.ProductResultDTO{}, nil
-// }
-// func (f *fakeProductGateway) Delete(id string) error { return nil }
-
-// // ...adicione outros métodos obrigatórios da interface IProductDataSource...
-
-// // FakeCategoryGateway para dependência do controller
-
-// type fakeCategoryGateway struct{}
-
-// func (f *fakeCategoryGateway) Delete(id string) error               { return nil }
-// func (f *fakeCategoryGateway) FindAll() ([]daos.CategoryDAO, error) { return nil, nil }
-// func (f *fakeCategoryGateway) FindByID(id string) (daos.CategoryDAO, error) {
-// 	return daos.CategoryDAO{}, nil
-// }
-
-// // ...adicione outros métodos obrigatórios da interface ICategoryDataSource...
-
-// // FakeFileProvider para dependência do controller
-
-// type fakeFileProvider struct{}
-
-// func (f *fakeFileProvider) DeleteFile(path string) error                { return nil }
-// func (f *fakeFileProvider) DeleteFiles(paths []string) error            { return nil }
-// func (f *fakeFileProvider) GetPresignedURL(path string) (string, error) { return "", nil }
-// func (f *fakeFileProvider) UploadFile(path string, data []byte) error   { return nil }
-
-// // ...adicione outros métodos obrigatórios da interface IFileProvider...
-// // CATEGORIA - REMOVER DEPOIS
-
-// type mockCategoryDataSource struct {
-// 	insertFunc   func(dao daos.CategoryDAO) error
-// 	findAllFunc  func() ([]daos.CategoryDAO, error)
-// 	findByIDFunc func(id string) (daos.CategoryDAO, error)
-// 	updateFunc   func(dao daos.CategoryDAO) error
-// 	deleteFunc   func(id string) error
-// }
-
-// func (m *mockCategoryDataSource) Insert(dao daos.CategoryDAO) error {
-// 	return m.insertFunc(dao)
-// }
-// func (m *mockCategoryDataSource) FindAll() ([]daos.CategoryDAO, error) {
-// 	return m.findAllFunc()
-// }
-// func (m *mockCategoryDataSource) FindByID(id string) (daos.CategoryDAO, error) {
-// 	return m.findByIDFunc(id)
-// }
-// func (m *mockCategoryDataSource) Update(dao daos.CategoryDAO) error {
-// 	return m.updateFunc(dao)
-// }
-// func (m *mockCategoryDataSource) Delete(id string) error {
-// 	return m.deleteFunc(id)
-// }
+func setupProductHandlerTest(
+	findAllFunc func() ([]daos.ProductDAO, error),
+	findByIDFunc func(string) (daos.ProductDAO, error),
+	findAllImagesProductByIdFunc func(string) ([]daos.ProductImageDAO, error),
+	insertFunc func(daos.ProductDAO) error,
+	updateFunc func(daos.ProductDAO) error,
+	deleteFunc func(string) error,
+	deleteImageFunc func(string) error,
+	mockCategoryFindByID func(string) (daos.CategoryDAO, error),
+) (*gin.Engine, *httptest.ResponseRecorder, *ProductHandler) {
+	gin.SetMode(gin.TestMode)
+	mockProductDs := &mockProductDataSource{
+		findAllFunc:                  findAllFunc,
+		findByIDFunc:                 findByIDFunc,
+		findAllImagesProductByIdFunc: findAllImagesProductByIdFunc,
+		insertFunc:                   insertFunc,
+		updateFunc:                   updateFunc,
+		deleteFunc:                   deleteFunc,
+		deleteImageFunc:              deleteImageFunc,
+	}
+	mockCategoryDs := &mockCategoryDataSource{
+		findByIDFunc: mockCategoryFindByID,
+	}
+	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r := gin.New()
+	w := httptest.NewRecorder()
+	return r, w, h
+}
 
 func TestFindAllProducts_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -793,145 +667,3 @@ func TestUploadProductImage_BadRequest_ReadError(t *testing.T) {
 	// Para simular erro de leitura, seria necessário mockar io.ReadAll
 	// Este teste pode ser implementado se for possível mockar io.ReadAll
 }
-
-// func openTestImage(t *testing.T) *os.File {
-// 	imgPaths := []string{
-// 		"microservice/uploads/default_product_image.jpg",
-// 		"./microservice/uploads/default_product_image.jpg",
-// 		"uploads/default_product_image.jpg",
-// 		"./uploads/default_product_image.jpg",
-// 		"../uploads/default_product_image.jpg",
-// 		"../microservice/uploads/default_product_image.jpg",
-// 		"C:/Users/thali/fiap/api-microservice-catalog/microservice/uploads/default_product_image.jpg",
-// 	}
-// 	var f *os.File
-// 	var err error
-// 	for _, path := range imgPaths {
-// 		f, err = os.Open(path)
-// 		if err == nil {
-// 			return f
-// 		}
-// 	}
-// 	// Se não encontrar, retorna um arquivo fake JPEG
-// 	return createFakeJPEG(t)
-// }
-
-// func createFakeJPEG(t *testing.T) *os.File {
-// 	tempFile, err := os.CreateTemp("", "default_product_image_*.jpg")
-// 	if err != nil {
-// 		t.Fatalf("Não foi possível criar arquivo temporário de imagem: %v", err)
-// 	}
-// 	_, err = tempFile.Write([]byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01})
-// 	if err != nil {
-// 		t.Fatalf("Não foi possível escrever no arquivo temporário de imagem: %v", err)
-// 	}
-// 	tempFile.Seek(0, 0)
-// 	return tempFile
-// }
-
-// func TestUploadProductImage_UploadError_Bucket(t *testing.T) {
-// 	gin.SetMode(gin.TestMode)
-// 	mockProductDs := &mockProductDataSource{
-// 		uploadImageFunc: func(dto dtos.UploadProductImageDTO) error {
-// 			return errors.New("NoSuchBucket")
-// 		},
-// 	}
-// 	mockCategoryDs := &mockCategoryDataSource{}
-// 	mockFileProvider := &mock_interfaces.MockFileProvider{}
-// 	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
-
-// 	r := gin.New()
-// 	r.POST("/products/:id/images", h.UploadProductImage)
-
-// 	f := openTestImage(t)
-// 	defer f.Close()
-// 	file := f
-
-// 	body := &bytes.Buffer{}
-// 	writer := multipart.NewWriter(body)
-// 	part, _ := writer.CreateFormFile("image", "default_product_image.jpg")
-// 	_, err := io.Copy(part, file)
-// 	require.NoError(t, err)
-// 	writer.Close()
-
-// 	req := httptest.NewRequest(http.MethodPost, "/products/1/images", body)
-// 	req.Header.Set("Content-Type", writer.FormDataContentType())
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
-
-// 	if w.Code != 404 {
-// 		var resp map[string]interface{}
-// 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
-// 		t.Fatalf("Esperado status 404, recebido %d. Body: %v", w.Code, resp)
-// 	}
-// }
-
-// func TestUploadProductImage_UploadError_Other(t *testing.T) {
-// 	gin.SetMode(gin.TestMode)
-// 	mockProductDs := &mockProductDataSource{}
-// 	mockCategoryDs := &mockCategoryDataSource{}
-// 	mockFileProvider := &mock_interfaces.MockFileProvider{}
-// 	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
-
-// 	mockProductDs.uploadImageFunc = func(dto dtos.UploadProductImageDTO) error {
-// 		return errors.New("other error")
-// 	}
-
-// 	r := gin.New()
-// 	r.POST("/products/:id/images", h.UploadProductImage)
-
-// 	f := openTestImage(t)
-// 	defer f.Close()
-// 	file := f
-
-// 	body := &bytes.Buffer{}
-// 	writer := multipart.NewWriter(body)
-// 	part, _ := writer.CreateFormFile("image", "default_product_image.jpg")
-// 	_, err := io.Copy(part, file)
-// 	require.NoError(t, err)
-// 	writer.Close()
-
-// 	req := httptest.NewRequest(http.MethodPost, "/products/1/images", body)
-// 	req.Header.Set("Content-Type", writer.FormDataContentType())
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
-
-// 	require.Equal(t, 400, w.Code)
-// }
-
-// func TestUploadProductImage_Success(t *testing.T) {
-// 	gin.SetMode(gin.TestMode)
-// 	mockProductDs := &mockProductDataSource{
-// 		uploadImageFunc: func(dto dtos.UploadProductImageDTO) error {
-// 			return nil
-// 		},
-// 	}
-// 	mockCategoryDs := &mockCategoryDataSource{}
-// 	mockFileProvider := &mock_interfaces.MockFileProvider{}
-// 	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
-
-// 	r := gin.New()
-// 	r.POST("/products/:id/images", h.UploadProductImage)
-
-// 	f := openTestImage(t)
-// 	defer f.Close()
-// 	file := f
-
-// 	body := &bytes.Buffer{}
-// 	writer := multipart.NewWriter(body)
-// 	part, _ := writer.CreateFormFile("image", "default_product_image.jpg")
-// 	_, err := io.Copy(part, file)
-// 	require.NoError(t, err)
-// 	writer.Close()
-
-// 	req := httptest.NewRequest(http.MethodPost, "/products/1/images", body)
-// 	req.Header.Set("Content-Type", writer.FormDataContentType())
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
-
-// 	if w.Code != http.StatusNoContent {
-// 		var resp map[string]interface{}
-// 		_ = json.Unmarshal(w.Body.Bytes(), &resp)
-// 		t.Fatalf("Esperado status 204, recebido %d. Body: %v", w.Code, resp)
-// 	}
-// }
