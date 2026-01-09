@@ -263,35 +263,3 @@ func TestGormProductDataSource_DeleteImage_Error(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "erro ao deletar imagem")
 }
-
-// func TestGormProductDataSource_SetImageAsDefault(t *testing.T) {
-// 	db, mock, cleanup := setupMockDB(t)
-// 	defer cleanup()
-// 	ds := data_sources.NewProductDataSource(db)
-// 	// Não espere transação, apenas os dois updates
-// 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "product_images" SET "is_default"=$1 WHERE product_id = $2`)).WithArgs(false, "pid").WillReturnResult(sqlmock.NewResult(1, 1))
-// 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "product_images" SET "is_default"=$1 WHERE product_id = $2 AND id = $3`)).WithArgs(true, "pid", "imgid1").WillReturnResult(sqlmock.NewResult(1, 1))
-// 	err := ds.SetImageAsDefault("pid", "imgid1")
-// 	require.NoError(t, err)
-// }
-
-// func TestGormProductDataSource_SetImageAsDefault_ErrorOnUnsetAll(t *testing.T) {
-// 	db, mock, cleanup := setupMockDB(t)
-// 	defer cleanup()
-// 	ds := data_sources.NewProductDataSource(db)
-// 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "product_images" SET "is_default"=$1 WHERE product_id = $2`)).WithArgs(false, "pid").WillReturnError(errors.New("erro ao unsetar imagens"))
-// 	err := ds.SetImageAsDefault("pid", "imgid1")
-// 	require.Error(t, err)
-// 	require.Contains(t, err.Error(), "erro ao unsetar imagens")
-// }
-
-// func TestGormProductDataSource_SetImageAsDefault_ErrorOnSetDefault(t *testing.T) {
-// 	db, mock, cleanup := setupMockDB(t)
-// 	defer cleanup()
-// 	ds := data_sources.NewProductDataSource(db)
-// 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "product_images" SET "is_default"=$1 WHERE product_id = $2`)).WithArgs(false, "pid").WillReturnResult(sqlmock.NewResult(1, 1))
-// 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "product_images" SET "is_default"=$1 WHERE product_id = $2 AND id = $3`)).WithArgs(true, "pid", "imgid1").WillReturnError(errors.New("erro ao setar imagem default"))
-// 	err := ds.SetImageAsDefault("pid", "imgid1")
-// 	require.Error(t, err)
-// 	require.Contains(t, err.Error(), "erro ao setar imagem default")
-// }

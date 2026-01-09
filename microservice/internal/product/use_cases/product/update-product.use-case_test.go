@@ -69,5 +69,4 @@ func TestUpdateProductUseCase_SetNameError(t *testing.T) {
 	uc := use_cases.NewUpdateProductUseCase(*productGateway)
 	_, err := uc.Execute(productDTO)
 	require.Error(t, err)
-	// Aqui, o erro deve ser do tipo de validação de nome
 }

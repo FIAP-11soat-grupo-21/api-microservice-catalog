@@ -230,7 +230,7 @@ func TestProductController_Delete_Success(t *testing.T) {
 	}
 	mockProductDs.DeleteFunc = func(id string) error { return nil }
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
-	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes() // Garante que DeleteFile também está mockado
+	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes()
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	err := c.Delete("pid")
 	require.NoError(t, err)
@@ -241,7 +241,7 @@ func TestProductController_Delete_Error(t *testing.T) {
 	defer ctrl.Finish()
 	mockProductDs.DeleteFunc = func(id string) error { return errors.New("delete error") }
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
-	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes() // Garante que DeleteFile também está mockado
+	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes()
 	c := NewProductController(mockProductDs, mockCategoryDs, mockFileProvider)
 	err := c.Delete("pid")
 	require.Error(t, err)

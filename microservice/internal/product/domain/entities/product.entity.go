@@ -1,8 +1,6 @@
 package entities
 
 import (
-	// "fmt"
-
 	"slices"
 	"tech_challenge/internal/product/domain/exceptions"
 	value_objects "tech_challenge/internal/product/domain/value-objects"
