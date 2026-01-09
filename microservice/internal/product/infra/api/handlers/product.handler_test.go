@@ -17,38 +17,15 @@ import (
 	testmocks "tech_challenge/internal/shared/test"
 )
 
-// func setupProductHandlerTest(
-// 	findAllFunc func() ([]daos.ProductDAO, error),
-// 	findByIDFunc func(string) (daos.ProductDAO, error),
-// 	findAllImagesProductByIdFunc func(string) ([]daos.ProductImageDAO, error),
-// 	insertFunc func(daos.ProductDAO) error,
-// 	updateFunc func(daos.ProductDAO) error,
-// 	deleteFunc func(string) error,
-// 	deleteImageFunc func(string) error,
-// 	mockCategoryFindByID func(string) (daos.CategoryDAO, error),
-// ) (*gin.Engine, *httptest.ResponseRecorder, *ProductHandler) {
-// 	gin.SetMode(gin.TestMode)
-// 	mockProductDs := &testmocks.MockProductDataSource{
-// 		FindAllFunc:                  findAllFunc,
-// 		FindByIDFunc:                 findByIDFunc,
-// 		FindAllImagesProductByIdFunc: findAllImagesProductByIdFunc,
-// 		InsertFunc:                   insertFunc,
-// 		UpdateFunc:                   updateFunc,
-// 		DeleteFunc:                   deleteFunc,
-// 		DeleteImageFunc:              deleteImageFunc,
-// 	}
-// 	mockCategoryDs := &testmocks.MockCategoryDataSource{
-// 		FindByIDFunc: mockCategoryFindByID,
-// 	}
-// 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-// 	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
-// 	r := gin.New()
-// 	w := httptest.NewRecorder()
-// 	return r, w, h
-// }
+func setupProductTestEnv(productDs *testmocks.MockProductDataSource, categoryDs *testmocks.MockCategoryDataSource, fileProvider *mock_interfaces.MockIFileProvider) (*gin.Engine, *httptest.ResponseRecorder, *ProductHandler) {
+	gin.SetMode(gin.TestMode)
+	h := setupProductHandlerWithFakeGateway(productDs, categoryDs, fileProvider)
+	r := gin.New()
+	w := httptest.NewRecorder()
+	return r, w, h
+}
 
 func TestFindAllProducts_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindAllFunc: func() ([]daos.ProductDAO, error) {
 			return []daos.ProductDAO{{ID: "1", Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}}, nil
@@ -60,13 +37,11 @@ func TestFindAllProducts_Success(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.GET("/products", h.FindAllProducts)
 
 	req := httptest.NewRequest(http.MethodGet, "/products", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -79,7 +54,6 @@ func TestFindAllProducts_Success(t *testing.T) {
 }
 
 func TestFindAllProducts_WithCategoryID(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindAllFunc: func() ([]daos.ProductDAO, error) {
 			return []daos.ProductDAO{{ID: "2", Name: "prodcat", Description: "desc", Price: 2.0, Active: true, CategoryID: "catid2"}}, nil
@@ -91,13 +65,11 @@ func TestFindAllProducts_WithCategoryID(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.GET("/products", h.FindAllProducts)
 
 	req := httptest.NewRequest(http.MethodGet, "/products?category_id=catid2", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -111,7 +83,6 @@ func TestFindAllProducts_WithCategoryID(t *testing.T) {
 }
 
 func TestFindAllProducts_WithoutCategoryID(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindAllFunc: func() ([]daos.ProductDAO, error) {
 			return []daos.ProductDAO{{ID: "3", Name: "prodsemcat", Description: "desc", Price: 3.0, Active: true, CategoryID: ""}}, nil
@@ -123,13 +94,11 @@ func TestFindAllProducts_WithoutCategoryID(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.GET("/products", h.FindAllProducts)
 
 	req := httptest.NewRequest(http.MethodGet, "/products", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -142,7 +111,6 @@ func TestFindAllProducts_WithoutCategoryID(t *testing.T) {
 }
 
 func TestFindAllProducts_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindAllFunc: func() ([]daos.ProductDAO, error) {
 			return nil, errors.New("mock error")
@@ -154,9 +122,8 @@ func TestFindAllProducts_Error(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -166,14 +133,12 @@ func TestFindAllProducts_Error(t *testing.T) {
 	r.GET("/products", h.FindAllProducts)
 
 	req := httptest.NewRequest(http.MethodGet, "/products", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestFindAllImagesProductById_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
 			return []daos.ProductImageDAO{{ID: "imgid", ProductID: productID, FileName: "img.jpg", IsDefault: true}}, nil
@@ -185,13 +150,11 @@ func TestFindAllImagesProductById_Success(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.GET("/products/:id/images", h.FindAllImagesProductById)
 
 	req := httptest.NewRequest(http.MethodGet, "/products/1/images", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -206,7 +169,6 @@ func TestFindAllImagesProductById_Success(t *testing.T) {
 }
 
 func TestFindAllImagesProductById_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
 			return nil, errors.New("not found")
@@ -218,13 +180,11 @@ func TestFindAllImagesProductById_Error(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.GET("/products/:id/images", h.FindAllImagesProductById)
 
 	req := httptest.NewRequest(http.MethodGet, "/products/1/images", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusNotFound, w.Code)
@@ -236,7 +196,6 @@ func TestFindAllImagesProductById_Error(t *testing.T) {
 }
 
 func TestDeleteProduct_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteFunc: func(id string) error { return nil },
 	}
@@ -249,23 +208,20 @@ func TestDeleteProduct_Success(t *testing.T) {
 	defer ctrl.Finish()
 	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.DELETE("/products/:id", func(c *gin.Context) {
 		h.DeleteProduct(c)
 		c.Status(http.StatusNoContent)
 	})
 
 	req := httptest.NewRequest(http.MethodDelete, "/products/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusNoContent, w.Code)
 }
 
 func TestDeleteProduct_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteFunc: func(id string) error { return errors.New("delete error") },
 	}
@@ -278,9 +234,8 @@ func TestDeleteProduct_Error(t *testing.T) {
 	defer ctrl.Finish()
 	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -290,14 +245,12 @@ func TestDeleteProduct_Error(t *testing.T) {
 	r.DELETE("/products/:id", h.DeleteProduct)
 
 	req := httptest.NewRequest(http.MethodDelete, "/products/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestUpdateProduct_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		UpdateFunc: func(dao daos.ProductDAO) error { return nil },
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
@@ -310,15 +263,13 @@ func TestUpdateProduct_Success(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.PUT("/products/:id", h.UpdateProduct)
 
 	body := `{"category_id":"catid","name":"prod","description":"desc","price":1.0,"active":true}`
 	req := httptest.NewRequest(http.MethodPut, "/products/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -330,19 +281,16 @@ func TestUpdateProduct_Success(t *testing.T) {
 }
 
 func TestUpdateProduct_BadRequest(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{}
 	mockCategoryDs := &testmocks.MockCategoryDataSource{}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.PUT("/products/:id", h.UpdateProduct)
 
 	body := `{"name":1}` // inválido
 	req := httptest.NewRequest(http.MethodPut, "/products/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
@@ -354,7 +302,6 @@ func TestUpdateProduct_BadRequest(t *testing.T) {
 }
 
 func TestUpdateProduct_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		UpdateFunc: func(dao daos.ProductDAO) error { return errors.New("update error") },
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
@@ -367,9 +314,8 @@ func TestUpdateProduct_Error(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -381,14 +327,12 @@ func TestUpdateProduct_Error(t *testing.T) {
 	body := `{"category_id":"catid","name":"prod","description":"desc","price":1.0,"active":true}`
 	req := httptest.NewRequest(http.MethodPut, "/products/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestFindProductByID_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
 			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
@@ -400,13 +344,11 @@ func TestFindProductByID_Success(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.GET("/products/:id", h.FindProductByID)
 
 	req := httptest.NewRequest(http.MethodGet, "/products/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -418,7 +360,6 @@ func TestFindProductByID_Success(t *testing.T) {
 }
 
 func TestFindProductByID_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
 			return daos.ProductDAO{}, errors.New("not found")
@@ -430,9 +371,8 @@ func TestFindProductByID_Error(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -442,14 +382,12 @@ func TestFindProductByID_Error(t *testing.T) {
 	r.GET("/products/:id", h.FindProductByID)
 
 	req := httptest.NewRequest(http.MethodGet, "/products/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func TestCreateProduct_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		InsertFunc: func(dao daos.ProductDAO) error { return nil },
 	}
@@ -459,15 +397,13 @@ func TestCreateProduct_Success(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.POST("/products", h.CreateProduct)
 
 	body := `{"category_id":"catid","name":"prod","description":"desc","price":1.0,"active":true}`
 	req := httptest.NewRequest(http.MethodPost, "/products", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusCreated, w.Code)
@@ -479,19 +415,16 @@ func TestCreateProduct_Success(t *testing.T) {
 }
 
 func TestCreateProduct_BadRequest(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{}
 	mockCategoryDs := &testmocks.MockCategoryDataSource{}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.POST("/products", h.CreateProduct)
 
 	body := `{"name":1}` // inválido
 	req := httptest.NewRequest(http.MethodPost, "/products", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
@@ -503,7 +436,6 @@ func TestCreateProduct_BadRequest(t *testing.T) {
 }
 
 func TestCreateProduct_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		InsertFunc: func(dao daos.ProductDAO) error { return errors.New("create error") },
 	}
@@ -513,9 +445,8 @@ func TestCreateProduct_Error(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -527,7 +458,6 @@ func TestCreateProduct_Error(t *testing.T) {
 	body := `{"category_id":"catid","name":"prod","description":"desc","price":1.0,"active":true}`
 	req := httptest.NewRequest(http.MethodPost, "/products", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
@@ -540,7 +470,6 @@ func TestNewProductHandler(t *testing.T) {
 }
 
 func TestDeleteProductImage_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteImageFunc: func(imageFileName string) error { return nil },
 		FindAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
@@ -575,13 +504,11 @@ func TestDeleteProductImage_Success(t *testing.T) {
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
 	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes()
 
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.DELETE("/products/:id/images/:image_file_name", h.DeleteProductImage)
 
 	req := httptest.NewRequest(http.MethodDelete, "/products/1/images/img.jpg", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusNoContent {
@@ -592,7 +519,6 @@ func TestDeleteProductImage_Success(t *testing.T) {
 }
 
 func TestDeleteProductImage_BadRequest(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteImageFunc: func(imageFileName string) error {
 			return errors.New("Product image cannot be empty, at least one image is required")
@@ -607,13 +533,11 @@ func TestDeleteProductImage_BadRequest(t *testing.T) {
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.DELETE("/products/:id/images/:image_file_name", h.DeleteProductImage)
 
 	req := httptest.NewRequest(http.MethodDelete, "/products/1/images/img.jpg", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	if w.Code == http.StatusConflict {
@@ -627,7 +551,6 @@ func TestDeleteProductImage_BadRequest(t *testing.T) {
 }
 
 func TestDeleteProduct_ReturnsNoContent(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteFunc: func(id string) error { return nil },
 	}
@@ -640,16 +563,14 @@ func TestDeleteProduct_ReturnsNoContent(t *testing.T) {
 	defer ctrl.Finish()
 	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.DELETE("/products/:id", func(c *gin.Context) {
 		h.DeleteProduct(c)
 		c.Status(http.StatusNoContent)
 	})
 
 	req := httptest.NewRequest(http.MethodDelete, "/products/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusNoContent, w.Code)
@@ -657,17 +578,14 @@ func TestDeleteProduct_ReturnsNoContent(t *testing.T) {
 }
 
 func TestUploadProductImage_BadRequest_BindError(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockProductDs := &testmocks.MockProductDataSource{}
 	mockCategoryDs := &testmocks.MockCategoryDataSource{}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
-	h := setupProductHandlerWithFakeGateway(mockProductDs, mockCategoryDs, mockFileProvider)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
-	r := gin.New()
 	r.POST("/products/:id/images", h.UploadProductImage)
 
 	req := httptest.NewRequest(http.MethodPost, "/products/1/images", nil) // sem multipart
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
