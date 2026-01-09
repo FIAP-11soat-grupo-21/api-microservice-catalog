@@ -15,20 +15,25 @@ import (
 	testmocks "tech_challenge/internal/shared/test"
 )
 
-func TestFindAllCategories_Success(t *testing.T) {
+func setupCategoryTestEnv(mockCategoryDs *testmocks.MockCategoryDataSource) (*gin.Engine, *httptest.ResponseRecorder, *CategoryHandler) {
 	gin.SetMode(gin.TestMode)
+	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r := gin.New()
+	w := httptest.NewRecorder()
+	return r, w, h
+}
+
+func TestFindAllCategories_Success(t *testing.T) {
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		FindAllFunc: func() ([]daos.CategoryDAO, error) {
 			return []daos.CategoryDAO{{ID: "1", Name: "Bebidas", Active: true}}, nil
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.GET("/categories", h.FindAllCategories)
 
 	req := httptest.NewRequest(http.MethodGet, "/categories", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -41,16 +46,14 @@ func TestFindAllCategories_Success(t *testing.T) {
 }
 
 func TestFindAllCategories_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		FindAllFunc: func() ([]daos.CategoryDAO, error) {
 			return nil, errors.New("mock error")
 		},
 	}
 
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -60,26 +63,22 @@ func TestFindAllCategories_Error(t *testing.T) {
 	r.GET("/categories", h.FindAllCategories)
 
 	req := httptest.NewRequest(http.MethodGet, "/categories", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestFindCategoryByID_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.GET("/categories/:id", h.FindCategoryByID)
 
 	req := httptest.NewRequest(http.MethodGet, "/categories/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -91,15 +90,13 @@ func TestFindCategoryByID_Success(t *testing.T) {
 }
 
 func TestFindCategoryByID_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{}, errors.New("not found")
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -109,26 +106,22 @@ func TestFindCategoryByID_Error(t *testing.T) {
 	r.GET("/categories/:id", h.FindCategoryByID)
 
 	req := httptest.NewRequest(http.MethodGet, "/categories/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func TestCreateCategory_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		InsertFunc: func(dao daos.CategoryDAO) error { return nil },
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.POST("/categories", h.CreateCategory)
 
 	body := `{"name":"Bebidas","active":true}`
 	req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusCreated, w.Code)
@@ -140,17 +133,14 @@ func TestCreateCategory_Success(t *testing.T) {
 }
 
 func TestCreateCategory_BadRequest(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.POST("/categories", h.CreateCategory)
 
 	body := `{"name":1}` // inválido
 	req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
@@ -162,13 +152,11 @@ func TestCreateCategory_BadRequest(t *testing.T) {
 }
 
 func TestCreateCategory_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		InsertFunc: func(dao daos.CategoryDAO) error { return errors.New("create error") },
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -180,29 +168,25 @@ func TestCreateCategory_Error(t *testing.T) {
 	body := `{"name":"Bebidas","active":true}`
 	req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestUpdateCategory_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		UpdateFunc: func(dao daos.CategoryDAO) error { return nil },
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.PUT("/categories/:id", h.UpdateCategory)
 
 	body := `{"name":"Bebidas","active":true}`
 	req := httptest.NewRequest(http.MethodPut, "/categories/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -214,17 +198,14 @@ func TestUpdateCategory_Success(t *testing.T) {
 }
 
 func TestUpdateCategory_BadRequest(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.PUT("/categories/:id", h.UpdateCategory)
 
 	body := `{"name":1}` // inválido
 	req := httptest.NewRequest(http.MethodPut, "/categories/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
@@ -236,16 +217,14 @@ func TestUpdateCategory_BadRequest(t *testing.T) {
 }
 
 func TestUpdateCategory_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		UpdateFunc: func(dao daos.CategoryDAO) error { return errors.New("update error") },
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -257,43 +236,37 @@ func TestUpdateCategory_Error(t *testing.T) {
 	body := `{"name":"Bebidas","active":true}`
 	req := httptest.NewRequest(http.MethodPut, "/categories/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestDeleteCategory_Success(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		DeleteFunc: func(id string) error { return nil },
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.DELETE("/categories/:id", h.DeleteCategory)
 
 	req := httptest.NewRequest(http.MethodDelete, "/categories/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusNoContent, w.Code)
 }
 
 func TestDeleteCategory_Error(t *testing.T) {
-	gin.SetMode(gin.TestMode)
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		DeleteFunc: func(id string) error { return errors.New("delete error") },
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
-	h := setupCategoryHandlerWithFakeGateway(mockCategoryDs)
+	r, w, h := setupCategoryTestEnv(mockCategoryDs)
 
-	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		c.Next()
 		if len(c.Errors) > 0 {
@@ -303,7 +276,6 @@ func TestDeleteCategory_Error(t *testing.T) {
 	r.DELETE("/categories/:id", h.DeleteCategory)
 
 	req := httptest.NewRequest(http.MethodDelete, "/categories/1", nil)
-	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusInternalServerError, w.Code)
