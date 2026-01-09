@@ -25,18 +25,30 @@ func setupProductTestEnv(productDs *testmocks.MockProductDataSource, categoryDs 
 	return r, w, h
 }
 
-func TestFindAllProducts_Success(t *testing.T) {
-	mockProductDs := &testmocks.MockProductDataSource{
-		FindAllFunc: func() ([]daos.ProductDAO, error) {
-			return []daos.ProductDAO{{ID: "1", Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}}, nil
-		},
-	}
+// Helper para criar mocks padrão para Product e Category
+func makeDefaultMocks(productDs *testmocks.MockProductDataSource) (*testmocks.MockProductDataSource, *testmocks.MockCategoryDataSource, *mock_interfaces.MockIFileProvider) {
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
 			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
 		},
 	}
 	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	return productDs, mockCategoryDs, mockFileProvider
+}
+
+func makeGomockFileProvider(t *testing.T) *mock_interfaces.MockIFileProvider {
+	ctrl := gomock.NewController(t)
+	t.Cleanup(ctrl.Finish)
+	return mock_interfaces.NewMockIFileProvider(ctrl)
+}
+
+func TestFindAllProducts_Success(t *testing.T) {
+	mockProductDs := &testmocks.MockProductDataSource{
+		FindAllFunc: func() ([]daos.ProductDAO, error) {
+			return []daos.ProductDAO{{ID: "1", Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}}, nil
+		},
+	}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.GET("/products", h.FindAllProducts)
@@ -59,12 +71,7 @@ func TestFindAllProducts_WithCategoryID(t *testing.T) {
 			return []daos.ProductDAO{{ID: "2", Name: "prodcat", Description: "desc", Price: 2.0, Active: true, CategoryID: "catid2"}}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.GET("/products", h.FindAllProducts)
@@ -88,12 +95,7 @@ func TestFindAllProducts_WithoutCategoryID(t *testing.T) {
 			return []daos.ProductDAO{{ID: "3", Name: "prodsemcat", Description: "desc", Price: 3.0, Active: true, CategoryID: ""}}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.GET("/products", h.FindAllProducts)
@@ -116,12 +118,7 @@ func TestFindAllProducts_Error(t *testing.T) {
 			return nil, errors.New("mock error")
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.Use(func(c *gin.Context) {
@@ -144,12 +141,7 @@ func TestFindAllImagesProductById_Success(t *testing.T) {
 			return []daos.ProductImageDAO{{ID: "imgid", ProductID: productID, FileName: "img.jpg", IsDefault: true}}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.GET("/products/:id/images", h.FindAllImagesProductById)
@@ -174,12 +166,7 @@ func TestFindAllImagesProductById_Error(t *testing.T) {
 			return nil, errors.New("not found")
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.GET("/products/:id/images", h.FindAllImagesProductById)
@@ -199,14 +186,8 @@ func TestDeleteProduct_Success(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteFunc: func(id string) error { return nil },
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs, mockCategoryDs, _ := makeDefaultMocks(mockProductDs)
+	mockFileProvider := makeGomockFileProvider(t)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
@@ -225,14 +206,8 @@ func TestDeleteProduct_Error(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteFunc: func(id string) error { return errors.New("delete error") },
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs, mockCategoryDs, _ := makeDefaultMocks(mockProductDs)
+	mockFileProvider := makeGomockFileProvider(t)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
@@ -257,12 +232,7 @@ func TestUpdateProduct_Success(t *testing.T) {
 			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.PUT("/products/:id", h.UpdateProduct)
@@ -282,8 +252,7 @@ func TestUpdateProduct_Success(t *testing.T) {
 
 func TestUpdateProduct_BadRequest(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.PUT("/products/:id", h.UpdateProduct)
@@ -308,12 +277,7 @@ func TestUpdateProduct_Error(t *testing.T) {
 			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.Use(func(c *gin.Context) {
@@ -338,12 +302,7 @@ func TestFindProductByID_Success(t *testing.T) {
 			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.GET("/products/:id", h.FindProductByID)
@@ -365,12 +324,7 @@ func TestFindProductByID_Error(t *testing.T) {
 			return daos.ProductDAO{}, errors.New("not found")
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.Use(func(c *gin.Context) {
@@ -391,12 +345,7 @@ func TestCreateProduct_Success(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		InsertFunc: func(dao daos.ProductDAO) error { return nil },
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.POST("/products", h.CreateProduct)
@@ -416,8 +365,7 @@ func TestCreateProduct_Success(t *testing.T) {
 
 func TestCreateProduct_BadRequest(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.POST("/products", h.CreateProduct)
@@ -439,12 +387,7 @@ func TestCreateProduct_Error(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		InsertFunc: func(dao daos.ProductDAO) error { return errors.New("create error") },
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.Use(func(c *gin.Context) {
@@ -493,14 +436,8 @@ func TestDeleteProductImage_Success(t *testing.T) {
 			}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs, mockCategoryDs, _ := makeDefaultMocks(mockProductDs)
+	mockFileProvider := makeGomockFileProvider(t)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
 	mockFileProvider.EXPECT().DeleteFile(gomock.Any()).Return(nil).AnyTimes()
 
@@ -527,12 +464,7 @@ func TestDeleteProductImage_BadRequest(t *testing.T) {
 			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
 		},
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.DELETE("/products/:id/images/:image_file_name", h.DeleteProductImage)
@@ -554,14 +486,8 @@ func TestDeleteProduct_ReturnsNoContent(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		DeleteFunc: func(id string) error { return nil },
 	}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{
-		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			return daos.CategoryDAO{ID: id, Name: "Bebidas", Active: true}, nil
-		},
-	}
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
+	mockProductDs, mockCategoryDs, _ := makeDefaultMocks(mockProductDs)
+	mockFileProvider := makeGomockFileProvider(t)
 	mockFileProvider.EXPECT().DeleteFiles(gomock.Any()).Return(nil).AnyTimes()
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
@@ -579,8 +505,7 @@ func TestDeleteProduct_ReturnsNoContent(t *testing.T) {
 
 func TestUploadProductImage_BadRequest_BindError(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{}
-	mockCategoryDs := &testmocks.MockCategoryDataSource{}
-	mockFileProvider := &mock_interfaces.MockIFileProvider{}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
 	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
 
 	r.POST("/products/:id/images", h.UploadProductImage)
