@@ -138,7 +138,7 @@ func TestCreateCategory_BadRequest(t *testing.T) {
 
 	r.POST("/categories", h.CreateCategory)
 
-	body := `{"name":1}` // inválido
+	body := `{"name":1}`
 	req := httptest.NewRequest(http.MethodPost, "/categories", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
@@ -203,7 +203,7 @@ func TestUpdateCategory_BadRequest(t *testing.T) {
 
 	r.PUT("/categories/:id", h.UpdateCategory)
 
-	body := `{"name":1}` // inválido
+	body := `{"name":1}`
 	req := httptest.NewRequest(http.MethodPut, "/categories/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)

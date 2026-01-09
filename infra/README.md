@@ -56,4 +56,3 @@ terraform apply
 terraform destroy
 ```
 
-Teste2

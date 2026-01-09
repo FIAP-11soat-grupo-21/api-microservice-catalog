@@ -31,7 +31,6 @@ type S3FileProvider struct {
 
 func NewS3FileProvider() *S3FileProvider {
 	cfgEnv := env.GetConfig()
-	fmt.Printf("[DEBUG] Config S3: Bucket=%s, Endpoint=%s, Region=%s\n", cfgEnv.AWS.S3.BucketName, cfgEnv.AWS.S3.Endpoint, cfgEnv.AWS.Region)
 	var client *s3.Client
 
 	if cfgEnv.AWS.S3.Endpoint == "" {
@@ -98,7 +97,6 @@ func (s *S3FileProvider) DeleteFile(fileName string) error {
 	})
 
 	if err != nil {
-		fmt.Printf("[S3FileProvider] Erro ao deletar do bucket: %v\n", err)
 		return fmt.Errorf("failed to delete file: %w", err)
 	}
 	fmt.Printf("[S3FileProvider] DeleteObject response: %+v\n", resp)

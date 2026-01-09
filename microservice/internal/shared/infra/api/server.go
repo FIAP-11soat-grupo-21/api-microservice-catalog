@@ -39,11 +39,8 @@ func Init() {
 
 	healthHandler := handlers.NewHealthHandler()
 	ginRouter.GET("/health", healthHandler.Health)
-	// ginRouter.GET("/v1/health", healthHandler.Health)
 
 	v1Routes := ginRouter.Group("/v1")
-
-	// file_router.RegisterFileRoutes(v1Routes.Group("/uploads"))
 
 	product_router.RegisterProductRoutes(v1Routes.Group("/products"))
 	product_router.RegisterCategoryRoutes(v1Routes.Group("/categories"))

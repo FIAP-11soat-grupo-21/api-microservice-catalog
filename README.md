@@ -13,7 +13,7 @@ Este microsserviço tem como objetivo central o cadastro e a gestão de produtos
 
 Este repositório contém dois principais diretórios:
 
-- **infra/**: scripts e módulos de infraestrutura como código (IaC) para provisionamento de recursos na AWS, incluindo banco de dados, rede, ECS, bucket S3, entre outros.
+- **infra/**: scripts e módulos de infraestrutura como código (IaC) para provisionamento de recursos na AWS, rede, ECS, bucket S3, entre outros.
 - **microservice/**: código-fonte do microsserviço de catálogo, responsável pelo gerenciamento de produtos e categorias.
 
 ---
@@ -35,9 +35,6 @@ Principais variáveis utilizadas (veja exemplos completos em `.env.local.example
 
 A pasta `infra` utiliza Terraform para provisionar toda a infraestrutura necessária na AWS. Entre os recursos provisionados estão:
 
-- **Banco de Dados (RDS/Postgres):**
-  - O banco de dados é criado via módulo e seu endpoint é passado como variável de ambiente para o container do microsserviço no ECS.
-  - O RDS garante alta disponibilidade, backups automáticos e segurança de dados.
 - **ECS (Elastic Container Service):**
   - O microsserviço é executado em containers gerenciados pelo ECS, garantindo escalabilidade e fácil deploy.
 - **ALB (Application Load Balancer):**
@@ -214,6 +211,21 @@ Assim, sempre que um produto não tiver imagem, o sistema irá retornar a imagem
 
 ---
 
+## Deploy na AWS
+
+Para realizar o deploy do microsserviço na AWS, basta executar o workflow:
+
+- **Deploy Application to ECS**
+  - Esse workflow provisiona toda a infraestrutura necessária (ECS, ALB, variáveis de ambiente, etc) e faz o deploy do container na AWS.
+
+Para remover/destruir a aplicação da AWS, execute o workflow:
+
+- **Destroy Application from ECS**
+  - Esse workflow remove todos os recursos provisionados (serviço ECS, ALB, etc) e faz o cleanup do ambiente na AWS.
+
+Esses workflows podem ser executados diretamente pela interface do GitHub Actions ou pela sua esteira CI/CD, facilitando o gerenciamento do ciclo de vida da aplicação em produção.
+
+---
 
 ## Exemplos de uso das rotas
 Exemplo para criar uma categoria:
@@ -228,9 +240,6 @@ curl -X POST http://localhost:8080/v1/products \
   -H 'Content-Type: application/json' \
   -d '{"name": "Coca-Cola", "category_id": "<id>", "price": 5.99, "active": true}'
 ```
-
-## Deploy na AWS
-#TODO
 
 ## Como rodar testes unitários localmente e visualizar cobertura de código
 

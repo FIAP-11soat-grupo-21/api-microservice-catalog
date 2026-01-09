@@ -12,11 +12,6 @@ type GormProductDataSource struct {
 	db *gorm.DB
 }
 
-//	func NewProductDataSource(db *gorm.DB) *GormProductDataSource {
-//		return &GormProductDataSource{
-//			db: database.GetDB(),
-//		}
-//	}
 func NewProductDataSource(db *gorm.DB) *GormProductDataSource {
 	return &GormProductDataSource{db: db}
 }

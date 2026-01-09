@@ -224,8 +224,6 @@ func TestProductGateway_UploadImage_Error(t *testing.T) {
 	require.Equal(t, "", url)
 }
 
-// Mock para simular erro no UploadFile
-
 type mockFileProviderErrorUpload struct{}
 
 func (m *mockFileProviderErrorUpload) UploadFile(fileName string, fileContent []byte) error {

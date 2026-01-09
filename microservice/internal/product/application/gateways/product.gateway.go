@@ -199,23 +199,6 @@ func (g *ProductGateway) AddProductImage(img daos.ProductImageDAO) error {
 	return g.dataSource.AddProductImage(img)
 }
 
-// func (g *ProductGateway) SetProductImageAsDefault(product entities.Product, img *value_objects.Image) error {
-// 	imgDAO := daos.ProductImageDAO{
-// 		ID:        img.ID,
-// 		ProductID: product.ID,
-// 		FileName:  img.FileName,
-// 		Url:       img.Url,
-// 		IsDefault: true,
-// 		CreatedAt: img.CreatedAt,
-// 	}
-// 	// Adiciona a nova imagem como default
-// 	if err := g.dataSource.AddProductImage(imgDAO); err != nil {
-// 		return err
-// 	}
-// 	// Atualiza todas as outras imagens para is_default = false
-// 	return g.dataSource.SetAllPreviousImagesAsNotDefault(product.ID, img.ID)
-// }
-
 func (g *ProductGateway) AddAndSetDefaultImage(product entities.Product, url string) error {
 	if len(product.Images) == 0 {
 		return fmt.Errorf("Produto não possui imagens para atualizar")

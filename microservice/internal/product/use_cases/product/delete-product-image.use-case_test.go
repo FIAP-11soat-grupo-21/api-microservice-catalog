@@ -96,27 +96,3 @@ func TestDeleteProductImageUseCase_CannotBeEmpty(t *testing.T) {
 	_, ok := err.(*exceptions.ProductImageCannotBeEmptyException)
 	require.True(t, ok)
 }
-
-// func TestDeleteProductImageUseCase_DefaultImage_SetLastImageAsDefaultError(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
-// 	mockProductDataSource := mock_interfaces.NewMockIProductDataSource(ctrl)
-// 	mockFileProvider := mock_interfaces.NewMockIFileProvider(ctrl)
-// 	productID := "prod-1"
-// 	imageFileName := "img1.jpg"
-
-// 	mockProductDataSource.EXPECT().FindByID(productID).Return(daos.ProductDAO{ID: productID, Name: "Produto Teste", Description: "desc", Price: 10.0}, nil)
-// 	mockProductDataSource.EXPECT().FindAllImagesProductById(productID).Return(
-// 		[]daos.ProductImageDAO{
-// 			{FileName: imageFileName},
-// 			{FileName: "img2.jpg"},
-// 		}, nil)
-// 	mockProductDataSource.EXPECT().ImageIsDefault(imageFileName).Return(true)
-// 	mockProductDataSource.EXPECT().SetLastImageAsDefault(productID, imageFileName).Return(errors.New("default error"))
-
-// 	gw := gateways.NewProductGateway(mockProductDataSource, mockFileProvider)
-// 	uc := NewDeleteProductImageUseCase(*gw)
-// 	err := uc.Execute(productID, imageFileName)
-// 	require.Error(t, err)
-// 	require.EqualError(t, err, "default error")
-// }

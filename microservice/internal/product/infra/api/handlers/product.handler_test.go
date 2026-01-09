@@ -25,7 +25,6 @@ func setupProductTestEnv(productDs *testmocks.MockProductDataSource, categoryDs 
 	return r, w, h
 }
 
-// Helper para criar mocks padrão para Product e Category
 func makeDefaultMocks(productDs *testmocks.MockProductDataSource) (*testmocks.MockProductDataSource, *testmocks.MockCategoryDataSource, *mock_interfaces.MockIFileProvider) {
 	mockCategoryDs := &testmocks.MockCategoryDataSource{
 		FindByIDFunc: func(id string) (daos.CategoryDAO, error) {
@@ -257,7 +256,7 @@ func TestUpdateProduct_BadRequest(t *testing.T) {
 
 	r.PUT("/products/:id", h.UpdateProduct)
 
-	body := `{"name":1}` // inválido
+	body := `{"name":1}`
 	req := httptest.NewRequest(http.MethodPut, "/products/1", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
@@ -370,7 +369,7 @@ func TestCreateProduct_BadRequest(t *testing.T) {
 
 	r.POST("/products", h.CreateProduct)
 
-	body := `{"name":1}` // inválido
+	body := `{"name":1}`
 	req := httptest.NewRequest(http.MethodPost, "/products", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(w, req)
@@ -510,23 +509,8 @@ func TestUploadProductImage_BadRequest_BindError(t *testing.T) {
 
 	r.POST("/products/:id/images", h.UploadProductImage)
 
-	req := httptest.NewRequest(http.MethodPost, "/products/1/images", nil) // sem multipart
+	req := httptest.NewRequest(http.MethodPost, "/products/1/images", nil)
 	r.ServeHTTP(w, req)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
-}
-
-func TestUploadProductImage_BadRequest_FileOpenError(t *testing.T) {
-	// Para simular erro de Open, seria necessário mockar o campo Image do schema
-	// Este teste pode ser implementado se o schema permitir injeção/mocks
-}
-
-func TestUploadProductImage_BadRequest_FileTypeError(t *testing.T) {
-	// Para simular erro de tipo, seria necessário mockar utils.FileIsImage
-	// Este teste pode ser implementado se utils.FileIsImage for mockável
-}
-
-func TestUploadProductImage_BadRequest_ReadError(t *testing.T) {
-	// Para simular erro de leitura, seria necessário mockar io.ReadAll
-	// Este teste pode ser implementado se for possível mockar io.ReadAll
 }

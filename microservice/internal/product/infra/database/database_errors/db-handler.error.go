@@ -1,7 +1,6 @@
 package database_errors
 
 import (
-	"fmt"
 	"regexp"
 	"tech_challenge/internal/product/domain/exceptions"
 )
@@ -11,18 +10,14 @@ func HandleDatabaseErrors(err error) error {
 		return nil
 	}
 
-	fmt.Printf("[HandleDatabaseErrors] Mensagem de erro: %v\n", err.Error())
 	code := ExtractDatabaseState(err.Error())
-	fmt.Printf("[HandleDatabaseErrors] SQLSTATE extraído: %v\n", code)
+
 	switch code {
 	case "":
-		fmt.Println("[HandleDatabaseErrors] Nenhum SQLSTATE encontrado, retornando erro original")
 		return err
 	case "23001", "23503":
-		fmt.Println("[HandleDatabaseErrors] Mapeando para CategoryHasProductsException")
 		return &exceptions.CategoryHasProductsException{}
 	}
-	fmt.Println("[HandleDatabaseErrors] Retornando erro original")
 	return err
 }
 

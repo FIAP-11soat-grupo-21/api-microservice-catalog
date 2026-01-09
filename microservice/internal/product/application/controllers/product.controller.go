@@ -77,12 +77,6 @@ func (c *ProductController) Update(productDTO dtos.UpdateProductDTO) (dtos.Produ
 func (c *ProductController) UploadImage(uploadDTO dtos.UploadProductImageDTO) error {
 	uploadProductImageUseCase := use_cases.NewUploadProductImageUseCase(c.productGateway)
 	return uploadProductImageUseCase.Execute(uploadDTO)
-	// if err != nil {
-	// 	fmt.Printf("[UploadImage] Erro ao executar use case: %v (tipo: %T)\n", err, err)
-	// } else {
-	// 	fmt.Println("[UploadImage] Upload realizado com sucesso!")
-	// }
-	// return err
 }
 
 func (c *ProductController) DeleteImage(productID string, imageFileName string) error {

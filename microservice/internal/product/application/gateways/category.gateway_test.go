@@ -65,7 +65,6 @@ func TestCategoryGateway_FindAll_Error(t *testing.T) {
 func TestCategoryGateway_FindAll_Error_Entity(t *testing.T) {
 	gw := NewCategoryGateway(&mockCategoryDataSource{
 		findAllFunc: func() ([]daos.CategoryDAO, error) {
-			// Retorna um CategoryDAO inválido para forçar erro na conversão para entidade
 			return []daos.CategoryDAO{{ID: "", Name: "", Active: true}}, nil
 		},
 	})
@@ -97,7 +96,6 @@ func TestCategoryGateway_FindByID_Error(t *testing.T) {
 func TestCategoryGateway_FindByID_Error_Entity(t *testing.T) {
 	gw := NewCategoryGateway(&mockCategoryDataSource{
 		findByIDFunc: func(id string) (daos.CategoryDAO, error) {
-			// Retorna um CategoryDAO inválido para forçar erro na conversão para entidade
 			return daos.CategoryDAO{ID: "", Name: "", Active: true}, nil
 		},
 	})
