@@ -228,7 +228,17 @@ func TestUpdateProduct_Success(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		UpdateFunc: func(dao daos.ProductDAO) error { return nil },
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
+			return daos.ProductDAO{
+				ID:          id,
+				Name:        "prod",
+				Description: "desc",
+				Price:       1.0,
+				Active:      true,
+				CategoryID:  "catid",
+				Images: []daos.ProductImageDAO{
+					{ID: "img.jpg", ProductID: id, FileName: "img.jpg", IsDefault: true},
+				},
+			}, nil
 		},
 	}
 	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
@@ -273,7 +283,17 @@ func TestUpdateProduct_Error(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		UpdateFunc: func(dao daos.ProductDAO) error { return errors.New("update error") },
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
+			return daos.ProductDAO{
+				ID:          id,
+				Name:        "prod",
+				Description: "desc",
+				Price:       1.0,
+				Active:      true,
+				CategoryID:  "catid",
+				Images: []daos.ProductImageDAO{
+					{ID: "img.jpg", ProductID: id, FileName: "img.jpg", IsDefault: true},
+				},
+			}, nil
 		},
 	}
 	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
@@ -298,7 +318,17 @@ func TestUpdateProduct_Error(t *testing.T) {
 func TestFindProductByID_Success(t *testing.T) {
 	mockProductDs := &testmocks.MockProductDataSource{
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
+			return daos.ProductDAO{
+				ID:          id,
+				Name:        "prod",
+				Description: "desc",
+				Price:       1.0,
+				Active:      true,
+				CategoryID:  "catid",
+				Images: []daos.ProductImageDAO{
+					{ID: "img.jpg", ProductID: id, FileName: "img.jpg", IsDefault: true},
+				},
+			}, nil
 		},
 	}
 	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
@@ -460,7 +490,17 @@ func TestDeleteProductImage_BadRequest(t *testing.T) {
 			return errors.New("Product image cannot be empty, at least one image is required")
 		},
 		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
-			return daos.ProductDAO{ID: id, Name: "prod", Description: "desc", Price: 1.0, Active: true, CategoryID: "catid"}, nil
+			return daos.ProductDAO{
+				ID:          id,
+				Name:        "prod",
+				Description: "desc",
+				Price:       1.0,
+				Active:      true,
+				CategoryID:  "catid",
+				Images: []daos.ProductImageDAO{
+					{ID: "img.jpg", ProductID: id, FileName: "img.jpg", IsDefault: true},
+				},
+			}, nil
 		},
 	}
 	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
@@ -479,6 +519,45 @@ func TestDeleteProductImage_BadRequest(t *testing.T) {
 	} else {
 		require.Equal(t, http.StatusBadRequest, w.Code)
 	}
+}
+
+func TestDeleteProductImage_Conflict(t *testing.T) {
+	mockProductDs := &testmocks.MockProductDataSource{
+		DeleteImageFunc: func(imageFileName string) error {
+			return errors.New("só possui uma imagem")
+		},
+		FindByIDFunc: func(id string) (daos.ProductDAO, error) {
+			return daos.ProductDAO{
+				ID:          id,
+				Name:        "prod",
+				Description: "desc",
+				Price:       1.0,
+				Active:      true,
+				CategoryID:  "catid",
+				Images: []daos.ProductImageDAO{
+					{ID: "img.jpg", ProductID: id, FileName: "img.jpg", IsDefault: true},
+				},
+			}, nil
+		},
+		FindAllImagesProductByIdFunc: func(productID string) ([]daos.ProductImageDAO, error) {
+			return []daos.ProductImageDAO{
+				{ID: "img.jpg", ProductID: productID, FileName: "img.jpg", IsDefault: true},
+			}, nil
+		},
+	}
+	mockProductDs, mockCategoryDs, mockFileProvider := makeDefaultMocks(mockProductDs)
+	r, w, h := setupProductTestEnv(mockProductDs, mockCategoryDs, mockFileProvider)
+
+	r.DELETE("/products/:id/images/:image_file_name", h.DeleteProductImage)
+
+	req := httptest.NewRequest(http.MethodDelete, "/products/1/images/img.jpg", nil)
+	r.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusConflict, w.Code)
+	var resp map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	require.NoError(t, err)
+	require.Contains(t, resp["error"], "Product image cannot be empty")
 }
 
 func TestDeleteProduct_ReturnsNoContent(t *testing.T) {
