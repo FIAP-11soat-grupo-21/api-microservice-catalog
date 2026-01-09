@@ -18,26 +18,21 @@ func NewUploadProductImageUseCase(gateway gateways.ProductGateway) *UploadProduc
 
 func (uc *UploadProductImageUseCase) Execute(productDTO dtos.UploadProductImageDTO) error {
 	product, err := uc.gateway.FindByID(productDTO.ProductID)
-
 	if err != nil {
 		return &exceptions.ProductNotFoundException{}
 	}
 
 	newFileName, err := product.AddImage(productDTO.FileName)
-
-	if err != nil {
-		return err
-	}
-
-	err = uc.gateway.UploadImage(*newFileName, productDTO.FileContent)
-
 	if err != nil {
 		return &exceptions.InvalidProductImageException{}
 	}
 
-	err = uc.gateway.Update(product)
-
+	url, err := uc.gateway.UploadImage(*newFileName, productDTO.FileContent)
 	if err != nil {
+		return err
+	}
+
+	if err := uc.gateway.AddAndSetDefaultImage(product, url); err != nil {
 		return &exceptions.InvalidProductDataException{}
 	}
 

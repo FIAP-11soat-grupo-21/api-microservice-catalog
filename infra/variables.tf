@@ -41,3 +41,78 @@ variable "task_role_policy_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "alb_is_internal" {
+  description = "Se o ALB é interno"
+  type        = bool
+  default     = true
+}
+
+#########################################################
+################# Variáveis do DynamoDB #################
+#########################################################
+
+variable "dynamodb_hash_key" {
+  description = "Hash key da tabela DynamoDB"
+  type        = string
+  default     = "id"
+}
+
+variable "dynamodb_hash_key_type" {
+  description = "Tipo da hash key da tabela DynamoDB"
+  type        = string
+  default     = "S"
+}
+
+variable "dynamodb_billing_mode" {
+  description = "Billing mode da tabela DynamoDB"
+  type        = string
+  default     = "PAY_PER_REQUEST"
+}
+
+variable "dynamodb_range_keys" {
+  description = "Lista de range keys (nome, tipo) para a tabela DynamoDB"
+  type = list(object({
+    name = string
+    type = string
+  }))
+  default = []
+}
+
+#########################################################
+############### Variáveis do API Gateway ################
+#########################################################
+
+variable "apigw_integration_type" {
+  description = "Tipo de integração do API Gateway"
+  type        = string
+  default     = "HTTP_PROXY"
+}
+
+variable "apigw_integration_method" {
+  description = "Método de integração do API Gateway"
+  type        = string
+  default     = "ANY"
+}
+
+variable "apigw_payload_format_version" {
+  description = "Versão do payload do API Gateway"
+  type        = string
+  default     = "1.0"
+}
+
+variable "apigw_connection_type" {
+  description = "Tipo de conexão do API Gateway"
+  type        = string
+  default     = "VPC_LINK"
+}
+
+variable "authorization_name" {
+  description = "Link do authorizer do API Gateway"
+  type        = string
+}
+
+variable "app_path_pattern" {
+  description = "Lista de padrões de caminho para o listener rule do ALB"
+  type        = list(string)
+}

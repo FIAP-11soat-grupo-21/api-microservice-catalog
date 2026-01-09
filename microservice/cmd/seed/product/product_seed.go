@@ -36,7 +36,7 @@ func SeedProducts(dataSource interfaces.IProductDataSource) {
 
 		imageID := uuid.NewString()
 		fileName := "default_product_image.webp"
-		url := "http://localhost:8080/uploads/default_product_image.webp"
+		url := "http://minio:9000/product-photo-fiap-tech-challenge-catalog/default_product_image.webp"
 		createdAt := time.Now()
 
 		img := map[string]interface{}{

@@ -9,8 +9,8 @@ import (
 
 	product_router "tech_challenge/internal/product/infra/api/routes"
 	"tech_challenge/internal/shared/config/env"
+	"tech_challenge/internal/shared/infra/api/handlers"
 	"tech_challenge/internal/shared/infra/api/middlewares"
-	file_router "tech_challenge/internal/shared/infra/api/routes"
 	_ "tech_challenge/internal/shared/infra/api/swagger"
 	"tech_challenge/internal/shared/infra/database"
 )
@@ -37,12 +37,15 @@ func Init() {
 	ginRouter.Use(gin.Recovery())
 	ginRouter.Use(middlewares.ErrorHandlerMiddleware())
 
-	v1Routes := ginRouter.Group("/v1")
+	healthHandler := handlers.NewHealthHandler()
+	ginRouter.GET("/health", healthHandler.Health)
 
-	file_router.RegisterFileRoutes(v1Routes.Group("/uploads"))
+	v1Routes := ginRouter.Group("/v1")
 
 	product_router.RegisterProductRoutes(v1Routes.Group("/products"))
 	product_router.RegisterCategoryRoutes(v1Routes.Group("/categories"))
 
-	ginRouter.Run(config.APIUrl)
+	if err := ginRouter.Run(config.APIUrl); err != nil {
+		log.Fatalf("failed to start gin server: %v", err)
+	}
 }

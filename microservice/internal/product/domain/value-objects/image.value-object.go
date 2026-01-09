@@ -8,13 +8,18 @@ import (
 	"tech_challenge/internal/product/domain/exceptions"
 	"tech_challenge/internal/shared/config/env"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const DEFAULT_IMAGE_FILE_NAME = "default_product_image.webp"
 
 type Image struct {
-	FileName string
-	Url      string
+	ID        string
+	FileName  string
+	Url       string
+	CreatedAt time.Time
+	IsDefault bool
 }
 
 type ImageValue struct {
@@ -54,25 +59,31 @@ func NewImage(originalFileName string) (Image, error) {
 	imageUrl := fmt.Sprintf("%s/%s", imageHost, fileName)
 
 	return Image{
-		FileName: fileName,
-		Url:      imageUrl,
+		FileName:  fileName,
+		Url:       imageUrl,
+		IsDefault: true,
+		ID:        uuid.NewString(),
+		CreatedAt: time.Now(),
 	}, nil
 }
 
 func NewImageDefault() (Image, error) {
 	config := env.GetConfig()
-
 	imageHost := config.APIUploadUrl
-
-	imageUrl := fmt.Sprintf("%s/%s", imageHost, DEFAULT_IMAGE_FILE_NAME)
-
+	bucket := config.AWS.S3.BucketName
+	imageUrl := fmt.Sprintf("%s/%s/%s", imageHost, bucket, DEFAULT_IMAGE_FILE_NAME)
+	id := uuid.NewString()
+	fmt.Printf("[NewImageDefault] Gerando imagem default: ID=%s, FileName=%s, Url=%s\n", id, DEFAULT_IMAGE_FILE_NAME, imageUrl)
 	return Image{
-		FileName: DEFAULT_IMAGE_FILE_NAME,
-		Url:      imageUrl,
+		ID:        id,
+		FileName:  DEFAULT_IMAGE_FILE_NAME,
+		Url:       imageUrl,
+		IsDefault: true,
+		CreatedAt: time.Now(),
 	}, nil
 }
 
-func NewImageWithFileNameAndUrl(fileName, url string) (Image, error) {
+func NewImageWithFileNameAndUrl(fileName, url string, isDefault bool) (Image, error) {
 	if fileName == "" || url == "" {
 		return Image{}, &exceptions.InvalidProductDataException{
 			Message: "Image file name and URL are required",
@@ -80,8 +91,11 @@ func NewImageWithFileNameAndUrl(fileName, url string) (Image, error) {
 	}
 
 	return Image{
-		FileName: fileName,
-		Url:      url,
+		FileName:  fileName,
+		Url:       url,
+		IsDefault: isDefault,
+		ID:        uuid.NewString(),
+		CreatedAt: time.Now(),
 	}, nil
 }
 
@@ -96,10 +110,6 @@ func sanitizeFileName(fileName string) string {
 		}
 	}
 	return sanitized.String()
-}
-
-func (i *Image) IsDefault() bool {
-	return i.FileName == DEFAULT_IMAGE_FILE_NAME
 }
 
 func (i *Image) Value() ImageValue {

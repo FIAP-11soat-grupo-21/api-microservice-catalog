@@ -1,6 +1,7 @@
 package env
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -22,24 +23,13 @@ type Config struct {
 		Username      string
 		Password      string
 	}
-	PaymentGateway struct {
-		AccessToken   string
-		CollectorID   string
-		ExternalPosID string
-		ApiBaseURL    string
-	}
 	AWS struct {
-		Region          string
-		AccessKeyID     string
-		SecretAccessKey string
-		S3              struct {
+		Region string
+		S3     struct {
 			BucketName        string
 			Endpoint          string
 			PresignExpiration string
 		}
-	}
-	Google struct {
-		ProjectID string
 	}
 }
 
@@ -52,6 +42,7 @@ func GetConfig() *Config {
 	once.Do(func() {
 		instance = &Config{}
 		instance.Load()
+		fmt.Printf("[DEBUG] Configuração final: Bucket=%s, Endpoint=%s, Region=%s\n", instance.AWS.S3.BucketName, instance.AWS.S3.Endpoint, instance.AWS.Region)
 	})
 	return instance
 }
@@ -64,14 +55,17 @@ func getEnv(key string) string {
 	return value
 }
 
-func (c *Config) Load() {
-	dotEnvPath := ".env"
-	_, err := os.Stat(dotEnvPath)
+func getEnvOptional(key string) string {
+	return os.Getenv(key)
+}
 
+func (c *Config) Load() {
+	dotEnvPath := ".env.local"
+	_, err := os.Stat(dotEnvPath)
 	if err == nil {
-		err := godotenv.Load()
+		err := godotenv.Load(dotEnvPath)
 		if err != nil {
-			log.Fatal("Error loading .env file")
+			log.Fatalf("Erro ao carregar .env: %v", err)
 		}
 	}
 
@@ -89,20 +83,12 @@ func (c *Config) Load() {
 	c.Database.Username = getEnv("DB_USERNAME")
 	c.Database.Password = getEnv("DB_PASSWORD")
 
-	c.PaymentGateway.AccessToken = getEnv("ACCESS_TOKEN")
-	c.PaymentGateway.CollectorID = getEnv("COLLECTOR_ID")
-	c.PaymentGateway.ExternalPosID = getEnv("EXTERNAL_POS_ID")
-	c.PaymentGateway.ApiBaseURL = getEnv("MERCADOPAGO_API_URL")
-
 	c.AWS.Region = getEnv("AWS_REGION")
-	c.AWS.AccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
-	c.AWS.SecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
 
 	c.AWS.S3.BucketName = getEnv("AWS_S3_BUCKET_NAME")
-	c.AWS.S3.Endpoint = getEnv("AWS_S3_ENDPOINT")
+	fmt.Printf("[Config] Bucket lido do env: %s\n", c.AWS.S3.BucketName)
+	c.AWS.S3.Endpoint = getEnvOptional("AWS_S3_ENDPOINT")
 	c.AWS.S3.PresignExpiration = getEnv("AWS_S3_PRESIGN_EXPIRATION")
-
-	// c.Google.ProjectID = getEnv("GOOGLE_PROJECT_ID")
 }
 
 func (c *Config) IsProduction() bool {
@@ -111,4 +97,8 @@ func (c *Config) IsProduction() bool {
 
 func (c *Config) IsDevelopment() bool {
 	return c.GoEnv == "development"
+}
+func ResetConfig() {
+	instance = nil
+	once = sync.Once{}
 }

@@ -6,14 +6,6 @@ import (
 )
 
 func FromProductDAOToProductModel(product daos.ProductDAO) *models.ProductModel {
-	images := make([]models.ProductImageModel, 0, len(product.Images))
-	for _, image := range product.Images {
-		images = append(images, models.ProductImageModel{
-			FileName: image.FileName,
-			Url:      image.Url,
-		})
-	}
-
 	return &models.ProductModel{
 		ID:          product.ID,
 		CategoryID:  product.CategoryID,
@@ -21,7 +13,6 @@ func FromProductDAOToProductModel(product daos.ProductDAO) *models.ProductModel 
 		Description: product.Description,
 		Price:       product.Price,
 		Active:      product.Active,
-		Images:      images,
 	}
 }
 
@@ -29,8 +20,12 @@ func FromProductModelToProductDAO(product *models.ProductModel) (daos.ProductDAO
 	images := make([]daos.ProductImageDAO, len(product.Images))
 	for i, img := range product.Images {
 		images[i] = daos.ProductImageDAO{
-			FileName: img.FileName,
-			Url:      img.Url,
+			ID:        img.ID,
+			ProductID: img.ProductID,
+			FileName:  img.FileName,
+			Url:       img.Url,
+			IsDefault: img.IsDefault,
+			CreatedAt: img.CreatedAt,
 		}
 	}
 

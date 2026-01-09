@@ -4,16 +4,19 @@ import (
 	"tech_challenge/internal/product/application/dtos"
 	"tech_challenge/internal/product/application/gateways"
 	"tech_challenge/internal/product/domain/entities"
+	"tech_challenge/internal/product/domain/exceptions"
 	identity_manager "tech_challenge/internal/shared/pkg/identity"
 )
 
 type CreateProductUseCase struct {
-	gateway gateways.ProductGateway
+	productGateway  gateways.ProductGateway
+	categoryGateway gateways.CategoryGateway
 }
 
-func NewCreateProductUseCase(gateway gateways.ProductGateway) *CreateProductUseCase {
+func NewCreateProductUseCase(productGateway gateways.ProductGateway, categoryGateway gateways.CategoryGateway) *CreateProductUseCase {
 	return &CreateProductUseCase{
-		gateway: gateway,
+		productGateway:  productGateway,
+		categoryGateway: categoryGateway,
 	}
 }
 
@@ -26,13 +29,16 @@ func (uc *CreateProductUseCase) Execute(productDTO dtos.CreateProductDTO) (entit
 		productDTO.Price,
 		productDTO.Active,
 	)
-
 	if err != nil {
 		return entities.Product{}, err
 	}
 
-	err = uc.gateway.Insert(*product)
+	_, err = uc.categoryGateway.FindByID(product.CategoryID)
+	if err != nil {
+		return entities.Product{}, &exceptions.CategoryNotFoundException{}
+	}
 
+	err = uc.productGateway.Insert(*product)
 	if err != nil {
 		return entities.Product{}, err
 	}
