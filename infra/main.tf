@@ -57,17 +57,17 @@ module "GetCatalogAPIRoute" {
     },
     create_category = {
       route_key           = "POST /categories"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     update_category = {
       route_key           = "PUT /categories/{id}"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     delete_category = {
       route_key           = "DELETE /categories/{id}"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     get_product = {
@@ -82,27 +82,27 @@ module "GetCatalogAPIRoute" {
     },
     create_product = {
       route_key           = "POST /products"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     update_product = {
       route_key           = "PUT /products/{id}"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     delete_product = {
       route_key           = "DELETE /products/{id}"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     patch_product_image = {
       route_key           = "PATCH /products/{id}/images"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     delete_product_image = {
       route_key           = "DELETE /products/{id}/images/{image_file_name}"
-      restricted          = false
+      restricted          = true
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
     get_product_images = {
@@ -115,10 +115,6 @@ module "GetCatalogAPIRoute" {
       restricted          = false
       auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
     },
-    # v1_health = {
-    #   route_key           = "GET /v1/health"
-    #   restricted          = false
-    #   auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-    # },
+
   }
 }

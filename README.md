@@ -146,14 +146,21 @@ erDiagram
 
 ---
 
-## Como rodar localmente
+## Rodando localmente
 
-1. Suba os serviços necessários com Docker Compose:
+1. Preencha o arquivo `.env` com as variáveis de ambiente necessárias, conforme o exemplo disponível no projeto.
+2. Suba os serviços necessários com Docker Compose:
    ```sh
    docker compose up --build
    ```
-2. Exporte as variáveis de ambiente conforme o exemplo do `.env`.
-3. Execute o microsserviço normalmente.
+   > Certifique-se de que o `docker-compose.yml` está configurado para usar o arquivo `.env` correto (verifique a diretiva `env_file:` no compose).
+3. Execute o microsserviço normalmente, se necessário.
+4. Após a aplicação estar rodando, acesse a documentação interativa via Swagger em:
+   ```
+   http://localhost:8080/swagger/index.html
+   ```
+   > O caminho pode variar conforme a configuração do seu serviço.
+5. Utilize o Swagger para explorar e testar os endpoints da API.
 
 ---
 
@@ -259,3 +266,31 @@ Para rodar os testes unitários do microsserviço e visualizar a cobertura de c�
 > **Dica:**
 > - Se aparecer erro de dependências, rode `go mod tidy` antes de rodar os testes.
 > - Para aumentar a cobertura, crie arquivos `*_test.go` nos pacotes desejados.
+
+---
+
+## Teste BDD (Behavior Driven Development)
+
+O projeto inclui um cenário de teste BDD (Behavior Driven Development) localizado em `microservice/bdd/`, conforme requisito do Tech Challenge. Esse teste valida um fluxo de negócio ponta a ponta, garantindo que a aplicação atende ao cenário solicitado no trabalho.
+
+Para rodar o teste BDD:
+
+```sh
+cd microservice
+# Execute o teste BDD
+go test -v ./bdd -run TestMain
+```
+
+O teste BDD também é executado automaticamente na esteira CI/CD, conforme definido no workflow do GitHub Actions.
+
+---
+
+## Cobertura de Código
+
+A aplicação atinge a nota de cobertura de código solicitada no Tech Challenge, garantindo qualidade e confiabilidade nos testes automatizados.
+
+Abaixo um exemplo visual da cobertura de código dos testes unitários do projeto. Para gerar a sua própria imagem de cobertura, siga os passos da seção anterior ("Como rodar testes unitários localmente e visualizar cobertura de código").
+
+**Evidência de cobertura de código:**
+
+![Evidência de cobertura de código](docs/cobertura-micro-catalog.png)
